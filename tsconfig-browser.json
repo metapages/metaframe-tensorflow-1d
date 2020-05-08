@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "module": "esnext",
+        "sourceMap": true,
+        "lib": ["es2018", "dom"],
+        "target": "es5",
+        "noEmit": true,
+        "strict": true,
+        "noImplicitAny": false,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "skipLibCheck": true,
+        "noFallthroughCasesInSwitch": true,
+        "moduleResolution": "node"
+    },
+    "exclude": [
+        "./node_modules/",
+        "./server.ts",
+        "./server.js"
+    ]
+}

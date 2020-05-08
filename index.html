@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Tensorflow 1D convolutional neural net trainer/evaluator</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.4/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.4/dist/semantic.min.js"></script>
+
+  </head>
+  <body>
+    
+    <div class="ui grid padded">
+      <div class="row">
+        <div class="column">
+          <h3 class="ui header">Tensorflow 1D convolutional neural net trainer/evaluator</h3>
+          <div id="cache"></div>
+          <div id="message">
+            <div class="ui info message">
+              <i class="close icon"></i>
+              <div class="header">
+                Waiting for training data or model
+              </div>
+            </div>
+          </div>
+          <div id="evaluation-result">
+            eval result
+          </div>
+          <div id="Training"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="src/index.ts"></script>
+</html>

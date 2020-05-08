@@ -1,25 +1,33 @@
 {
-  "name": "git-glitched",
-  "version": "0.0.1",
-  "description": "Deploy to Glitch using git.",
+  "name": "tensorflow-convnet-1d",
+  "version": "1.0.0",
+  "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "fook": "npm run build-server && node server.js",
+    "start": "npm run clean && npm run build && node server.js",
+    "build": "npm run build-server && npm run build-client",
+    "build-server": "./node_modules/typescript/bin/tsc -p tsconfig-server.json",
+    "build-client": "./node_modules/typescript/bin/tsc -p tsconfig-browser.json && ./node_modules/parcel-bundler/bin/cli.js build --out-dir dist index.html",
+    "clean": "rm -rf server.js* && rm -rf dist/*"
   },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3"
+    "@tensorflow/tfjs": "^1.7.4",
+    "@tensorflow/tfjs-vis": "^1.4.0",
+    "base64-arraybuffer": "^0.2.0",
+    "fastify": "^2.14.1",
+    "fastify-blipp": "^2.3.1",
+    "fastify-static": "^2.7.0",
+    "http-server": "^0.12.1",
+    "metaframe": "^0.4.102",
+    "minimatch": "^3.0.4",
+    "object-hash": "^2.0.3",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-html-externals": "^0.2.0",
+    "tf": "^1.0.1",
+    "typescript": "^3.8.3"
   },
-  "engines": {
-    "node": "8.x"
-  },
-  "repository": {
-    "url": "https://github.com/noise-machines/git-glitched"
-  },
-  "license": "MIT",
-  "keywords": [
-    "node",
-    "glitch",
-    "express",
-    "git"
-  ]
+  "engines": { "node": "12.x" }
 }

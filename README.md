@@ -1,4 +1,4 @@
-Git Glitched
+Git Glitched (actually FANCY STUFF, modded2)
 ============
 
 Deploy to Glitch with a single `git push`.
