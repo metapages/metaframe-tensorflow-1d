@@ -1,9 +1,9 @@
 # This is half done. It's all client side for now, but there's a server 
 # serving everything also. Want to api/websocket that punk but not now
 
-parcel := "./node_modules/parcel-bundler/bin/cli.js"
-tsc    := "./node_modules/typescript/bin/tsc"
-certs  := ".certs"
+parcel           := "./node_modules/parcel-bundler/bin/cli.js"
+typescriptCheck  := "./node_modules/typescript/bin/tsc --build tsconfig-browser.json"
+certs            := ".certs"
 
 @_help:
     printf "🏵 Metaframe: Tensorflow 1D conv net\n"
@@ -20,25 +20,28 @@ init:
         just _mkcert; \
     fi
 
-# build production asset
-build:
-    {{tsc}} --noEmit
+# build production brower assets
+build-client:
+    {{typescriptCheck}}
     {{parcel}} build index.html
 
-@publish:
-    # delete current glitch branch, no worries, it gets rebuilt every time
-    @git branch -D glitch || exit 0
+publish:
+    @# delete current glitch branch, no worries, it gets rebuilt every time
+    git branch -D glitch || exit 0
     git checkout -b glitch
     git push -u --force origin glitch
     git checkout master
 
-# watches and builds assets
-@watch:
-    watchexec --watch src --exts ts,html -- just build
+# watches and builds browser client assets
+@watch-client:
+    watchexec --watch src --exts ts,html -- just build-client
+
+@watch-server:
+    watchexec --restart --watch server.ts -- "npm run build-server && node server.js"
 
 # starts a dev server [port 1234]
 run: cert-check
-    {{tsc}} --noEmit
+    {{typescriptCheck}}
     {{parcel}} --cert {{certs}}/cert.pem \
                --key {{certs}}/cert-key.pem \
                --port 1234 \

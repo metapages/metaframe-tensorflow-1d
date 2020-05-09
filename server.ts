@@ -15,6 +15,11 @@ const server: fastify.FastifyInstance<
   logger: false
 });
 
+server.register(require('fastify-cors'), { 
+  origin: '*',
+  methods: ['GET', 'HEAD', 'POST'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Content-Type'],
+})
 
 server.register(fastifyBlipp);
 
