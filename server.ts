@@ -4,6 +4,7 @@ import fastifyBlipp = require("fastify-blipp");
 import { Server, IncomingMessage, ServerResponse } from "http";
 import { execSync } from "child_process";
 import * as path from "path";
+import * as fs from "fs";
 
 const assets = 'public';
 
@@ -12,13 +13,19 @@ const server: fastify.FastifyInstance<
   IncomingMessage,
   ServerResponse
 > = fastify({
-  logger: false
+  logger: false,
+  https: {
+    key: fs.readFileSync(path.join(__dirname, '.certs', 'cert-key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '.certs', 'cert.pem'))
+  }
 });
 
 server.register(require('fastify-cors'), { 
-  origin: '*',
-  methods: ['GET', 'HEAD', 'POST'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Content-Type'],
+  origin: "*",
+  methods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE'],
+  // allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Content-Type'],
+  // // preflightContinue: true,
+  maxAge: 86400,
 })
 
 server.register(fastifyBlipp);
@@ -44,8 +51,8 @@ server.post('/deploy', (request, response) => {
   response.status(200).send()
 })
 
-server.get('/ping', async (request, reply) => {
-  return 'pong\n'
+server.get('/ping', (_, response) => {
+  response.send('pong\n');
 })
 
 server.get('/', (_, response: any) => {
