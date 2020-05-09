@@ -11,7 +11,10 @@ const server: fastify.FastifyInstance<
   Server,
   IncomingMessage,
   ServerResponse
-> = fastify();
+> = fastify({
+  logger: true
+});
+
 
 server.register(fastifyBlipp);
 
@@ -40,15 +43,14 @@ server.get('/ping', async (request, reply) => {
   return 'pong\n'
 })
 
-server.get('/', async (request, response: any) => {
-  response.sendFile(path.join(__dirname, assets, 'index.html'))
+server.get('/', (_, response: any) => {
+  response.sendFile('index.html')
 })
 
 server.register(fastifyStatic, {
   root: path.join(__dirname, assets),
   prefix: '/',
 })
-
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const start = async () => {
