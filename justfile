@@ -1,3 +1,6 @@
+# This is half done. It's all client side for now, but there's a server 
+# serving everything also. Want to api/websocket that punk but not now
+
 parcel := "./node_modules/parcel-bundler/bin/cli.js"
 tsc    := "./node_modules/typescript/bin/tsc"
 certs  := ".certs"
@@ -22,9 +25,17 @@ build:
     {{tsc}} --noEmit
     {{parcel}} build index.html
 
-package:
-    git branch -D glitch || exit 0
+@publish:
+    # delete current glitch branch, no worries, it gets rebuilt every time
+    @git branch -D glitch || exit 0
+    # build client and server
+    npm run build
     git checkout -b glitch
+    git add --force public/src*
+    git commit -m 'publish to glitch'
+    git push -u --force origin glitch
+
+
 
 # watches and builds assets
 @watch:
@@ -40,6 +51,8 @@ run: cert-check
                --hmr-hostname metaframe-1d-trainer.local \
                --hmr-port 1235 \
                index.html
+
+
 
 # Removes generated files
 clean:
