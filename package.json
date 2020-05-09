@@ -8,8 +8,8 @@
     "start": "npm run clean && npm run build && node server.js",
     "build": "npm run build-server && npm run build-client",
     "build-server": "./node_modules/typescript/bin/tsc -p tsconfig-server.json",
-    "build-client": "./node_modules/typescript/bin/tsc -p tsconfig-browser.json && ./node_modules/parcel-bundler/bin/cli.js build --out-dir dist index.html",
-    "clean": "rm -rf server.js* && rm -rf dist/*"
+    "build-client": "./node_modules/typescript/bin/tsc -p tsconfig-browser.json && ./node_modules/parcel-bundler/bin/cli.js build --out-dir public index.html",
+    "clean": "rm -rf server.js* && rm -rf public/index.html public/src.*"
   },
   "author": "",
   "license": "ISC",
