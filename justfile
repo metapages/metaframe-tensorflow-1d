@@ -26,12 +26,15 @@ build:
     {{parcel}} build index.html
 
 @publish:
+    # delete generated files
+    rm -rf public/index.html public/src*
     # delete current glitch branch, no worries, it gets rebuilt every time
     @git branch -D glitch || exit 0
     # build client and server
     npm run build
     git checkout -b glitch
     git add --force public/src*
+    git add --force public/index.html
     git commit -m 'publish to glitch'
     git push -u --force origin glitch
 

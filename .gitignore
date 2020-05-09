@@ -2,5 +2,6 @@
 .certs
 node_modules
 dist
-assets
+public/index.html
+public/src.*
 server.js*
