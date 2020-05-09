@@ -12,7 +12,7 @@ const server: fastify.FastifyInstance<
   IncomingMessage,
   ServerResponse
 > = fastify({
-  logger: true
+  logger: false
 });
 
 
