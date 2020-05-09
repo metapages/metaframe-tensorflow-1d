@@ -12,6 +12,8 @@ import { Server, IncomingMessage, ServerResponse } from "http";
 import { execSync } from "child_process";
 import * as path from "path";
 
+const assets = 'dist';
+
 const server: fastify.FastifyInstance<
   Server,
   IncomingMessage,
@@ -19,19 +21,6 @@ const server: fastify.FastifyInstance<
 > = fastify();
 
 server.register(fastifyBlipp);
-
-server.register(fastifyStatic, {
-  root: path.join(__dirname, 'dist'),
-  prefix: '/',
-})
-
-server.get('/ping', async (request, reply) => {
-  return 'pong\n'
-})
-
-server.get('/', async (request, response: any) => {
-  response.sendFile(path.join(__dirname, 'index.html'))
-})
 
 server.post('/deploy', (request, response) => {
   if (request.query.secret !== process.env.SECRET) {
@@ -53,6 +42,20 @@ server.post('/deploy', (request, response) => {
   console.log(output)
   response.status(200).send()
 })
+
+server.get('/ping', async (request, reply) => {
+  return 'pong\n'
+})
+
+server.get('/', async (request, response: any) => {
+  response.sendFile(path.join(__dirname, assets, 'index.html'))
+})
+
+server.register(fastifyStatic, {
+  root: path.join(__dirname, assets),
+  prefix: '/',
+})
+
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const start = async () => {

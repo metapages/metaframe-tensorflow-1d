@@ -22,6 +22,10 @@ build:
     {{tsc}} --noEmit
     {{parcel}} build index.html
 
+package:
+    git branch -D glitch || exit 0
+    git checkout -b glitch
+
 # watches and builds assets
 @watch:
     watchexec --watch src --exts ts,html -- just build
