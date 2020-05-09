@@ -4,7 +4,7 @@ import fastifyBlipp = require("fastify-blipp");
 import { Server, IncomingMessage, ServerResponse } from "http";
 import { execSync } from "child_process";
 import * as path from "path";
-import * as fs from "fs";
+// import * as fs from "fs";
 
 const assets = 'public';
 
@@ -14,10 +14,10 @@ const server: fastify.FastifyInstance<
   ServerResponse
 > = fastify({
   logger: false,
-  https: {
-    key: fs.readFileSync(path.join(__dirname, '.certs', 'cert-key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '.certs', 'cert.pem'))
-  }
+  // https: {
+  //   key: fs.readFileSync(path.join(__dirname, '.certs', 'cert-key.pem')),
+  //   cert: fs.readFileSync(path.join(__dirname, '.certs', 'cert.pem'))
+  // }
 });
 
 server.register(require('fastify-cors'), { 
