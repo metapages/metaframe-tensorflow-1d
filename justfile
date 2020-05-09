@@ -30,6 +30,7 @@ build:
     @git branch -D glitch || exit 0
     git checkout -b glitch
     git push -u --force origin glitch
+    git checkout master
 
 # watches and builds assets
 @watch:
