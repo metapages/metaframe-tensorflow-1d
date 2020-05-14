@@ -41,9 +41,11 @@ export class JsonIOHandler implements tf.io.IOHandler {
         }
     }
     async load () : Promise<tf.io.ModelArtifacts> {
+        console.log('JsonIOHandler.loading')
         const modelArtifacts :tf.io.ModelArtifacts = Object.assign({}, this.modelJson);
         modelArtifacts.modelTopology = Base64Binary.decode(this.modelJson.modelTopology as string).buffer;
         modelArtifacts.weightData = Base64Binary.decode(this.modelJson.weightData as string).buffer;
+        console.log('JsonIOHandler.modelArtifacts', modelArtifacts)
         return modelArtifacts;
     }
 }

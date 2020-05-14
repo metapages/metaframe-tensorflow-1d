@@ -3,7 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 import { Rank } from '@tensorflow/tfjs';
 import {TrainingData} from './TrainingData';
 import { TrainingDataSet, PersistedModel, PredictionInput, PredictionResult, PersistedModelJson, PersistedModelMetadata } from './types.d';
-import { convertIMUSensorJsonToExample, IMUData, IMUSensorExample, IMUSensorJson} from './IMUData';
+import { convertIMUSensorJsonToExample, IMUSensorExample, IMUSensorJson} from './IMUData';
 import {Trainer} from './Trainer';
 import {jsonToModel, modelToJson} from './io';
 
@@ -19,6 +19,9 @@ const cache = urlParams.get('cache') === 'true' || urlParams.get('cache') === '1
 if (cache) {
   document.getElementById('cache')!.innerHTML = 'caching enabled';
 }
+
+// if currently computing, don't start another training until after
+let hashTrainingDataCurrentlyComputing :string|undefined = undefined;
 
 let model :PersistedModel | undefined = undefined;
 
@@ -178,7 +181,7 @@ const predict = async (input :PredictionInput) => {
 }
 
 const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =>{
-    
+    console.log('onNewTrainingData');
     
     // const loadedModel = await loadModel(hash);
     // if (loadedModel) {
@@ -191,9 +194,18 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
     const trainingData = new TrainingData(trainingDataSet);
     updateMessage('Training', 'yellow', ['metaframe input: TrainingDataSet', 'loading data...']);
     await trainingData.load();
-    console.log('LOADED');
+    console.log('LOADED training data');
 
     const hash = trainingData.hash();
+
+    if (hashTrainingDataCurrentlyComputing) {
+      console.log('Currently training, will train again after');
+      return;
+    }
+
+    // record the current training data hash so that we don't train concurrently
+    hashTrainingDataCurrentlyComputing = hash;
+
     const meta :PersistedModelMetadata = {
       prediction:{
         classNames: trainingData.classNames,
@@ -209,9 +221,11 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
 
     // check if we have a cached tensorflow model saved locally
     // const loadedModel = await tf.loadModel('indexeddb://my-model-1');
+    console.log(`checking cache=${cache}`)
     if (cache) {
       const loadedModel = await tf.loadLayersModel(`indexeddb://${hash}`);
       if (loadedModel) {
+        console.log(`checking loadedModel model found`)
         model = {
           model: loadedModel,
           meta: meta
@@ -220,9 +234,13 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
         
         if (isIframe()) {
           const persistedModelJson :PersistedModelJson = await modelToJson(model);
+          console.log(`metaframe.setOutput model`)
           metaframe.setOutput('model', persistedModelJson);
         }
         updateMessage('Model ready', 'green');
+        // lose the training marker
+        hashTrainingDataCurrentlyComputing = undefined;
+
         return;
       } 
     }
@@ -239,11 +257,14 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
     }
 
     if (cache) {
+      console.log(`saving trained model indexeddb://${hash}`)
       const saveResult = await model.model.save(`indexeddb://${hash}`);
       console.log('saveResult', saveResult);
     }
     if (isIframe()) {
+      console.log(`modelToJson`)
       const persistedModelJson :PersistedModelJson = await modelToJson(model);
+      console.log(`metaframe.setOutput`)
       metaframe.setOutput('model', persistedModelJson);
     }
     
@@ -327,8 +348,11 @@ const debugTrainOnTempSavedInputs = async () => {
 
 const run = async () => {
 
+    metaframe.onInputs((inputs :any) => {
+      console.log('onInputs', inputs);
+    })
     metaframe.onInput('training', (t :TrainingDataSet) => {
-      // console.log('got TrainingDataSet')
+      console.log('got metaframe input TrainingDataSet')
       // localStorage.setItem(`TrainingDataSet${id}`, JSON.stringify(t));
       onNewTrainingData(t);
     });
@@ -340,9 +364,12 @@ const run = async () => {
     });
 
     metaframe.onInput('model', async (modelJson :PersistedModelJson) => {
-      console.log('Got input model');
-      model = await jsonToModel(modelJson);
-      console.log('Loaded input model');
+      console.log('Got input model', modelJson);
+      // sanity check the value
+      if (modelJson && Object.keys(modelJson).length > 1) {
+        model = await jsonToModel(modelJson);
+        console.log('Loaded input model');
+      }
     });
     // jsonToModel
     

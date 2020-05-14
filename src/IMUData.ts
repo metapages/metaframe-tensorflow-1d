@@ -235,16 +235,16 @@ export class IMUData {
       this.gestureBegin();
     }
     if (chunk.a) {
-      this._streamingBuffer!.ax.push(chunk.a[0]);
-      this._streamingBuffer!.ay.push(chunk.a[1]);
-      this._streamingBuffer!.az.push(chunk.a[2]);
-      this._streamingBuffer!.at.push(chunk.a[3]);
+      this._streamingBuffer!.ax.push(chunk.a.x);
+      this._streamingBuffer!.ay.push(chunk.a.y);
+      this._streamingBuffer!.az.push(chunk.a.z);
+      this._streamingBuffer!.at.push(chunk.a.t);
     }
     if (chunk.g) {
-      this._streamingBuffer!.gx.push(chunk.g[0]);
-      this._streamingBuffer!.gy.push(chunk.g[1]);
-      this._streamingBuffer!.gz.push(chunk.g[2]);
-      this._streamingBuffer!.gt.push(chunk.g[3]);
+      this._streamingBuffer!.gx.push(chunk.g.x);
+      this._streamingBuffer!.gy.push(chunk.g.y);
+      this._streamingBuffer!.gz.push(chunk.g.z);
+      this._streamingBuffer!.gt.push(chunk.g.t);
     }
   }
 }

@@ -32,9 +32,10 @@ publish:
     git push -u --force origin glitch
     git checkout master
 
+# watchexec --watch src --exts ts,html -- just build-client
 # watches and builds browser client assets
 @watch-client:
-    watchexec --watch src --exts ts,html -- just build-client
+    {{parcel}} watch --out-dir public index.html
 
 @watch-server:
     watchexec --restart --watch server.ts -- "npm run build-server && node server.js"

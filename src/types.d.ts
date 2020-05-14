@@ -25,7 +25,8 @@
 //         ]
 //     }
 // }
-
+import * as tf from '@tensorflow/tfjs';
+import {IMUSensorJson, IMUSensorExample} from './IMUData';
 
 export type Base64String = string;
 
