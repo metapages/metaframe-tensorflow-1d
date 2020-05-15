@@ -11,11 +11,21 @@
   </head>
   <body>
     
-    <div class="ui grid padded">
+    <div class="ui grid padded one column">
       <div class="row">
         <div class="column">
           <h3 class="ui header">Tensorflow 1D convolutional neural net trainer/evaluator</h3>
-          <div id="cache"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
+          <Button id="cachebutton">
+            <Button.Content id="cachebuttoncontent">Clear cache</Button.Content>
+          </Button>
+      </div>
+      </div>
+      <div class="row">
+        <div class="column">
           <div id="message">
             <div class="ui info message">
               <i class="close icon"></i>
@@ -24,6 +34,10 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="column">
           <div id="evaluation-result">
             <h3 class="ui header">eval result</h3>
           </div>

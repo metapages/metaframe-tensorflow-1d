@@ -33,25 +33,24 @@ publish:
     git checkout master
 
 # watchexec --watch src --exts ts,html -- just build-client
-# watches and builds browser client assets
+# watches and builds browser client assets  (alternative to 'just run')
 @watch-client:
     {{parcel}} watch --out-dir public index.html
 
+# paired with watch-client (alternative to 'just run')
 @watch-server:
-    watchexec --restart --watch server.ts -- "npm run build-server && node server.js"
+    watchexec --restart --watch server.ts -- "npm run build-server && HTTPS=true node server.js"
 
-# starts a dev server [port 1234]
+# starts a dev server [port 1234] (alternative to 'just watch-client' && 'just watch-server')
 run: cert-check
     {{typescriptCheck}}
     {{parcel}} --cert {{certs}}/cert.pem \
                --key {{certs}}/cert-key.pem \
-               --port 1234 \
+               --port 3000 \
                --host metaframe-1d-trainer.local \
                --hmr-hostname metaframe-1d-trainer.local \
-               --hmr-port 1235 \
+               --hmr-port 3001 \
                index.html
-
-
 
 # Removes generated files
 clean:

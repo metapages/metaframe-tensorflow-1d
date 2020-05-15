@@ -8,16 +8,19 @@ import * as fs from "fs";
 
 const assets = 'public';
 
+// Only to provide parity with the just commands
+const https = process.env.HTTPS === 'true' ? {
+  key: fs.readFileSync(path.join(__dirname, '.certs', 'cert-key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, '.certs', 'cert.pem'))
+} : undefined;
+
 const server: fastify.FastifyInstance<
   Server,
   IncomingMessage,
   ServerResponse
 > = fastify({
   logger: false,
-  https: {
-    key: fs.readFileSync(path.join(__dirname, '.certs', 'cert-key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '.certs', 'cert.pem'))
-  }
+  https
 });
 
 server.register(require('fastify-cors'), { 

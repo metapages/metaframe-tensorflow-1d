@@ -14,11 +14,11 @@ const id :string = window.location.hash ? `-${window.location.hash.substr(1)}` :
 const metaframe = new Metaframe();
 
 const urlParams = new URLSearchParams(window.location.search);
-const cache = urlParams.get('cache') === 'true' || urlParams.get('cache') === '1';
+const nocache = urlParams.get('nocache') === 'true' || urlParams.get('nocache') === '1';
 
-if (cache) {
-  document.getElementById('cache')!.innerHTML = 'caching enabled';
-}
+// if (!nocache) {
+//   document.getElementById('cache')!.innerHTML = 'caching enabled';
+// }
 
 // if currently computing, don't start another training until after
 let hashTrainingDataCurrentlyComputing :string|undefined = undefined;
@@ -78,6 +78,12 @@ let model :PersistedModel | undefined = undefined;
 //     //     return persistedModel;
 //     // }
 // }
+
+const setModelCount = async () => {
+  const allModels = await tf.io.listModels();
+  const cachedModelCount = Object.keys(allModels).length;
+  document.getElementById('cachebuttoncontent').innerText = `Clear cache (${cachedModelCount} models)`;
+}
 
 const processPrediction = (example :IMUSensorExample) :Float32Array => {
     if (!example) {
@@ -203,6 +209,8 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
       return;
     }
 
+    console.log(`LOADED training data [${hash}]`);
+
     // record the current training data hash so that we don't train concurrently
     hashTrainingDataCurrentlyComputing = hash;
 
@@ -221,10 +229,12 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
 
     // check if we have a cached tensorflow model saved locally
     // const loadedModel = await tf.loadModel('indexeddb://my-model-1');
-    console.log(`checking cache=${cache}`)
-    if (cache) {
-      const loadedModel = await tf.loadLayersModel(`indexeddb://${hash}`);
-      if (loadedModel) {
+    console.log(`checking nocache=${nocache} [${hash}]`)
+    if (!nocache) {
+      const allModels = await tf.io.listModels();
+      if (allModels[`indexeddb://${hash}`]) {
+        const loadedModel = await tf.loadLayersModel(`indexeddb://${hash}`);
+        console.log(`loadedModel=${!!loadedModel} [${hash}]`)
         console.log(`checking loadedModel model found`)
         model = {
           model: loadedModel,
@@ -237,12 +247,14 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
           console.log(`metaframe.setOutput model`)
           metaframe.setOutput('model', persistedModelJson);
         }
-        updateMessage('Model ready', 'green');
+        updateMessage('Model ready (cached)', 'green');
         // lose the training marker
         hashTrainingDataCurrentlyComputing = undefined;
 
         return;
-      } 
+      } else {
+        console.log(`no loadedModel [${hash}]`)
+      }
     }
 
     
@@ -256,10 +268,11 @@ const onNewTrainingData :(t :TrainingDataSet)=> void = async (trainingDataSet) =
         meta: meta
     }
 
-    if (cache) {
+    if (!nocache) {
       console.log(`saving trained model indexeddb://${hash}`)
       const saveResult = await model.model.save(`indexeddb://${hash}`);
       console.log('saveResult', saveResult);
+      await setModelCount();
     }
     if (isIframe()) {
       console.log(`modelToJson`)
@@ -409,3 +422,18 @@ const updateMessage = (message:string, level='info', messages:string[]=[]) => {
 }
 
 document.addEventListener('DOMContentLoaded', run);
+
+
+// cache button
+setModelCount();
+
+document.getElementById('cachebutton').onclick = async () => {
+  const allModels = await tf.io.listModels();
+  const deletions = Object.keys(allModels).map(key => tf.io.removeModel(key));
+  try {
+    await Promise.all(deletions);
+  } catch(err) {
+    console.error(err);
+  }
+  await setModelCount();
+}
