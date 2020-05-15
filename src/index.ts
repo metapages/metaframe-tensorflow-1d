@@ -82,7 +82,7 @@ let model :PersistedModel | undefined = undefined;
 const setModelCount = async () => {
   const allModels = await tf.io.listModels();
   const cachedModelCount = Object.keys(allModels).length;
-  document.getElementById('cachebuttoncontent').innerText = `Clear cache (${cachedModelCount} models)`;
+  document.getElementById('cachebuttoncontent')!.innerText = `Clear cache (${cachedModelCount} models)`;
 }
 
 const processPrediction = (example :IMUSensorExample) :Float32Array => {
@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', run);
 // cache button
 setModelCount();
 
-document.getElementById('cachebutton').onclick = async () => {
+document.getElementById('cachebutton')!.onclick = async () => {
   const allModels = await tf.io.listModels();
   const deletions = Object.keys(allModels).map(key => tf.io.removeModel(key));
   try {

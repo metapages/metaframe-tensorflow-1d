@@ -35,6 +35,7 @@ publish:
 # watchexec --watch src --exts ts,html -- just build-client
 # watches and builds browser client assets  (alternative to 'just run')
 @watch-client:
+    {{typescriptCheck}}
     {{parcel}} watch --out-dir public index.html
 
 # paired with watch-client (alternative to 'just run')
