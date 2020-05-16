@@ -4,6 +4,7 @@
 parcel           := "./node_modules/parcel-bundler/bin/cli.js"
 typescriptCheck  := "./node_modules/typescript/bin/tsc --build tsconfig-browser.json"
 certs            := ".certs"
+HTTPS            := env_var_or_default("HTTPS", "true")
 
 @_help:
     printf "🏵 Metaframe: Tensorflow 1D conv net\n"
@@ -43,7 +44,7 @@ publish: build
 
 # paired with watch-client (alternative to 'just run')
 @watch-server:
-    watchexec --restart --watch server.ts -- "npm run build-server && HTTPS=true node server.js"
+    watchexec --restart --watch server.ts -- "npm run build-server && HTTPS={{HTTPS}} node server.js"
 
 # starts a dev server [port 1234] (alternative to 'just watch-client' && 'just watch-server')
 run: cert-check

@@ -193,7 +193,7 @@ export const convertIMUSensorExampleToJson :(example:IMUSensorExample) => IMUSen
 
 // the sensor gesture needs to be compacted
 export const convertIMUSensorJsonToExample :(example:IMUSensorJson) => IMUSensorExample = example => {
-  // console.log('convertIMUSensorJsonToExample example', example);
+  console.log('convertIMUSensorJsonToExample example', example);
   return {
       ax: new Float32Array(base64decode(example.ax)),
       ay: new Float32Array(base64decode(example.ay)),
@@ -225,10 +225,10 @@ for (var i = 0; i < chars.length; i++) {
 }
 
 export function base64encode(arraybuffer : ArrayBuffer) :string {
-  let bytes = new Uint8Array(arraybuffer),
-    i: number,
-    len = bytes.length,
-    base64 = "";
+  let bytes = new Uint8Array(arraybuffer);
+  let i: number;
+  let len = bytes.length;
+  let base64 = "";
 
   for (i = 0; i < len; i += 3) {
     base64 += chars[bytes[i] >> 2];
@@ -247,6 +247,9 @@ export function base64encode(arraybuffer : ArrayBuffer) :string {
 }
 
 export function base64decode(base64 : string) :ArrayBuffer {
+    if (!base64) {
+        throw new Error("base64decode string argument given");
+    }
   let bufferLength = base64.length * 0.75,
     len = base64.length,
     i:number,

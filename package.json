@@ -32,5 +32,12 @@
   },
   "engines": {
     "node": "12.x"
+  },
+  "staticFiles": {
+    "staticPath": "src",
+    "watcherGlob": "**"
+  },
+  "devDependencies": {
+    "parcel-plugin-static-files-copy": "^2.3.1"
   }
 }
