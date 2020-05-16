@@ -22,9 +22,13 @@ init:
 
 # build production brower assets
 build-client:
+    npm run build-client
+
+build:
     npm run build
 
-publish:
+publish: build
+    npm run clean
     @# delete current glitch branch, no worries, it gets rebuilt every time
     git branch -D glitch || exit 0
     git checkout -b glitch
