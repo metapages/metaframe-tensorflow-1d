@@ -22,8 +22,7 @@ init:
 
 # build production brower assets
 build-client:
-    {{typescriptCheck}}
-    {{parcel}} build index.html
+    npm run build
 
 publish:
     @# delete current glitch branch, no worries, it gets rebuilt every time
