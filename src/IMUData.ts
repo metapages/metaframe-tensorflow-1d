@@ -1,5 +1,5 @@
 import { Base64String } from './types';
-import * as base64 from 'base64-arraybuffer'
+import * as base64 from './base64';
 
 // const tab64 = {
 //   encode: (x :any) :string => '',
