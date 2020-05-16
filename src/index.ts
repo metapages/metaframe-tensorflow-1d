@@ -2,8 +2,9 @@ import { Metaframe, isIframe } from "metaframe";
 import * as tf from '@tensorflow/tfjs';
 import { Rank } from '@tensorflow/tfjs';
 import {TrainingData} from './TrainingData';
-import { TrainingDataSet, PersistedModel, PredictionInput, PredictionResult, PersistedModelJson, PersistedModelMetadata } from './types.d';
-import { convertIMUSensorJsonToExample, IMUSensorExample, IMUSensorJson} from './IMUData';
+import { PredictionInput, PredictionResult, TrainingDataSet, convertIMUSensorJsonToExample, IMUSensorExample, IMUSensorJson } from './metaframe';
+import { PersistedModel, PersistedModelJson, PersistedModelMetadata } from './types.d';
+// import { convertIMUSensorJsonToExample, IMUSensorExample, IMUSensorJson} from './lib';
 import {Trainer} from './Trainer';
 import {jsonToModel, modelToJson} from './io';
 
@@ -149,9 +150,9 @@ const predict = async (input :PredictionInput) => {
       return;
   }
 
-    let sampleFloatArrays :IMUSensorExample = input.data as IMUSensorExample;
+    let sampleFloatArrays :IMUSensorExample = (input.data as any ) as IMUSensorExample;
     if (typeof(sampleFloatArrays.at) === 'string') {
-        sampleFloatArrays = convertIMUSensorJsonToExample(input.data as IMUSensorJson);
+        sampleFloatArrays = convertIMUSensorJsonToExample((input.data as any ) as IMUSensorJson);
     }
 
     const processedSample = processPrediction(sampleFloatArrays);

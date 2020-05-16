@@ -1,6 +1,7 @@
 /**
  * @license
  * Private wand license.
+ * Currently very specific to gestures, need to loosen that up
  */
 
 /**
@@ -32,9 +33,10 @@
  * manipulation manually.
  */
 import * as objectHash from "object-hash";
-import { TrainingDataSet } from './types';
+// import { TrainingDataSet } from './types';
 import * as tf from '@tensorflow/tfjs';
-import {IMUData, IMUSensorExample} from './IMUData';
+import { TrainingDataSet, IMUSensorExample } from './metaframe';
+import {IMUData} from './IMUData';
 
 // const sensorNames = ['accelerometer', 'gyroscope'];
 // const axes = ['x', 'y', 'z'];
