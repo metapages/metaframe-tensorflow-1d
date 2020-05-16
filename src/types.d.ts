@@ -28,7 +28,7 @@
 import * as tf from '@tensorflow/tfjs';
 import {IMUSensorJson, IMUSensorExample} from './IMUData';
 
-export type Base64String = string;
+
 
 export interface PredictionInput {
     data: IMUSensorJson|IMUSensorExample;
