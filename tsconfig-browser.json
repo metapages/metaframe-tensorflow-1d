@@ -20,6 +20,7 @@
     "exclude": [
         "./node_modules/",
         "./server.ts",
-        "./server.js"
+        "./server.js",
+        "./dist"
     ]
 }

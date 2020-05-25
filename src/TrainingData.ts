@@ -509,9 +509,9 @@ export class TrainingData {
 //   }
 
 
-  allNonTimeValues(iterateFunc :(dataPoint :number, dataPointIndex :number, data :Float32Array|Int32Array, stream:string, exampleIndex:number, gesturename:string)=>void) {// iterateFunc: (value, index, array, coordinate<x|y|z>, sensor <accelerometer|gyroscope>, exampleIndex, action)
-    this.allNonTimeSensorStreams((sensorArray :Float32Array|Int32Array, sensorname:string, exampleIndex:number, gestureName:string) => {
-        sensorArray.forEach((sensorDataPoint :number, sensorDataPointIndex) => {
+  allNonTimeValues(iterateFunc :(dataPoint :number, dataPointIndex :number, data :Float32Array, stream:string, exampleIndex:number, gesturename:string)=>void) {// iterateFunc: (value, index, array, coordinate<x|y|z>, sensor <accelerometer|gyroscope>, exampleIndex, action)
+    this.allNonTimeSensorStreams((sensorArray :Float32Array, sensorname:string, exampleIndex:number, gestureName:string) => {
+        sensorArray.forEach((sensorDataPoint :number, sensorDataPointIndex :number) => {
             iterateFunc(sensorDataPoint, sensorDataPointIndex, sensorArray, sensorname, exampleIndex, gestureName);
         });
     });
@@ -525,7 +525,7 @@ export class TrainingData {
 //     });
 //   }
 
-  allSensorStreams(iterateFunc :(data :Float32Array|Int32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
+  allSensorStreams(iterateFunc :(data :Float32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
     Object.keys(this.data).forEach((gestureName :string) => {
       const examples = this.data[gestureName];
       examples.forEach((exampleBlob, exampleIndex) => {
@@ -538,7 +538,7 @@ export class TrainingData {
     });
   }
 
-  allNonTimeSensorStreams(iterateFunc :(data :Float32Array|Int32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
+  allNonTimeSensorStreams(iterateFunc :(data :Float32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
     Object.keys(this.data).forEach((gestureName :string) => {
       const examples = this.data[gestureName];
       examples.forEach((exampleBlob, exampleIndex) => {

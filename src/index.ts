@@ -161,10 +161,10 @@ const predict = async (input :PredictionInput) => {
 
     let highest :number = 0;
     let className :string = '';
-    const predictionMap :{[key:string]:any} = {};
+    const predictionMap :{[key:string]:number} = {};
 
-    model.meta.prediction.classNames.forEach((value, index) => {
-        predictionMap[value] = prediction[index];
+    model.meta.prediction.classNames.forEach((value :string, index :number) => {
+        predictionMap[value] = prediction[index] as number;
         if (prediction[index] > highest) {
             highest = prediction[index];
             className = value;
