@@ -750,8 +750,8 @@ export class TrainingData {
     });
 
     // normalize over max over all training examples
-    Object.keys(example).forEach(stream => {
-      example[stream].forEach((val, index, arr) => {
+    Object.keys(example).forEach((stream :string) => {
+      example[stream].forEach((val :number, index:number, arr) => {
         arr[index] = val / this._maxAbsoluteValue;
       });
     });
@@ -778,7 +778,7 @@ export class TrainingData {
     this.data = {};
     const data = this.data;
     this._streams = [];
-    const axesSet = {};
+    const axesSet :{[key:string]:boolean}= {};
     this.trainingDataJson.examples.forEach((example) => {
         const action = example.label;
         if (!data[action]) {

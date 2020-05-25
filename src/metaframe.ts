@@ -10,7 +10,7 @@ export type Base64String = string;
  */
 
 /* Generic map of keys to number arrays */
-export interface SensorSeries {[key:string] : Float32Array | Int32Array};
+export interface SensorSeries {[key:string] : Float32Array};
 export interface SensorSeriesBase64 {[key:string] : string };
 
 export const sensorSeriesDecode:(series :SensorSeriesBase64) => SensorSeries = series => {
