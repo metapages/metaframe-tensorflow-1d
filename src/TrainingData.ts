@@ -35,7 +35,7 @@
 import * as objectHash from "object-hash";
 // import { TrainingDataSet } from './types';
 import * as tf from '@tensorflow/tfjs';
-import { TrainingDataSet, IMUSensorExample, convertIMUSensorJsonToExample } from './metaframe';
+import { TrainingDataSet, SensorSeries, sensorSeriesDecode } from './metaframe';
 // import {IMUData} from './IMUData';
 
 // const sensorNames = ['accelerometer', 'gyroscope'];
@@ -45,7 +45,7 @@ const proportionTrainingSamples = 0.7;
 
 // const count = (a, b) => a + b;
 
-type GestureJson = {data:IMUSensorExample, url:string};
+type SensorJson = {data:SensorSeries, url:string};
 
 /**
  * async load() is where the important data filtering happens
@@ -54,8 +54,8 @@ export class TrainingData {
     trainingDataJson:TrainingDataSet;
     
     // action: {data:exampleData, url:title}
-    // <GestureName, Array<GestureJson>>
-    data:{ [key: string]: GestureJson[]; } = {}; // Final processed data
+    // <GestureName, Array<SensorJson>>
+    data:{ [key: string]: SensorJson[]; } = {}; // Final processed data
     dataArrays:any = {};
     _classes:string[] = [];
     // e.g. [ ax ay az gx gy gz ] computed from examples
@@ -315,41 +315,41 @@ export class TrainingData {
   }
 
   // Load a single gesture JSON blob
-  async loadGesture(url) {
-    const response = await fetch(url);
-    var gestureJson = await response.json();
+  // async loadGesture(url) {
+  //   const response = await fetch(url);
+  //   var sensorJson :SensorJson = await response.json();
     
     
-    // The original format is very inefficient.
-    // TODO should just store this format from the beginning
-    let length = gestureJson.accelerometer.length;
-    const accelerometer = {
-      x: new Float32Array(length),
-      y: new Float32Array(length),
-      z: new Float32Array(length),
-      t: new Int32Array(length),
-    };
-    length = gestureJson.gyroscope.length;
-    const gyroscope = {
-      x: new Float32Array(length),
-      y: new Float32Array(length),
-      z: new Float32Array(length),
-      t: new Int32Array(length),
-    };
-    for (let i = 0; i < gestureJson.accelerometer.length; i++) {
-      accelerometer.x[i] = gestureJson.accelerometer[i].x;
-      accelerometer.y[i] = gestureJson.accelerometer[i].y;
-      accelerometer.z[i] = gestureJson.accelerometer[i].z;
-      accelerometer.t[i] = gestureJson.accelerometer[i].t;
-    }
-    for (let i = 0; i < gestureJson.gyroscope.length; i++) {
-      gyroscope.x[i] = gestureJson.gyroscope[i].x;
-      gyroscope.y[i] = gestureJson.gyroscope[i].y;
-      gyroscope.z[i] = gestureJson.gyroscope[i].z;
-      gyroscope.t[i] = gestureJson.gyroscope[i].t;
-    }
-    return {accelerometer, gyroscope};
-  }
+  //   // The original format is very inefficient.
+  //   // TODO should just store this format from the beginning
+  //   let length = sensorJson.accelerometer.length;
+  //   const accelerometer = {
+  //     x: new Float32Array(length),
+  //     y: new Float32Array(length),
+  //     z: new Float32Array(length),
+  //     t: new Int32Array(length),
+  //   };
+  //   length = sensorJson.gyroscope.length;
+  //   const gyroscope = {
+  //     x: new Float32Array(length),
+  //     y: new Float32Array(length),
+  //     z: new Float32Array(length),
+  //     t: new Int32Array(length),
+  //   };
+  //   for (let i = 0; i < sensorJson.accelerometer.length; i++) {
+  //     accelerometer.x[i] = sensorJson.accelerometer[i].x;
+  //     accelerometer.y[i] = sensorJson.accelerometer[i].y;
+  //     accelerometer.z[i] = sensorJson.accelerometer[i].z;
+  //     accelerometer.t[i] = sensorJson.accelerometer[i].t;
+  //   }
+  //   for (let i = 0; i < sensorJson.gyroscope.length; i++) {
+  //     gyroscope.x[i] = sensorJson.gyroscope[i].x;
+  //     gyroscope.y[i] = sensorJson.gyroscope[i].y;
+  //     gyroscope.z[i] = sensorJson.gyroscope[i].z;
+  //     gyroscope.t[i] = sensorJson.gyroscope[i].t;
+  //   }
+  //   return {accelerometer, gyroscope};
+  // }
 
   /**
    * 
@@ -554,7 +554,7 @@ export class TrainingData {
     });
   }
 
-  allExamples(iterateFunc :(data :IMUSensorExample, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
+  allExamples(iterateFunc :(data :SensorSeries, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
     Object.keys(this.data).forEach((gestureName :string) => {
       const examples = this.data[gestureName];
       examples.forEach((exampleBlob, exampleIndex) => {
@@ -602,14 +602,14 @@ export class TrainingData {
         const timeStreams = this._streams.filter(s => s.endsWith('t'));
 
         // get the earliest time
-        let minTime = Number.MAX_VALUE;
+        let minTime :number = Number.MAX_VALUE;
         timeStreams.forEach(timestream => {
-            minTime = example[timestream].reduce((currentMin :number, sensorDataPoint:number) => Math.min(currentMin, sensorDataPoint), minTime);
+          example[timestream].forEach((sensorDataPoint:number) => minTime = Math.min(minTime, sensorDataPoint));
         });
 
         // make that zero and adjust
         timeStreams.forEach(timestream => {
-            example[timestream].forEach((time, index) => {
+            example[timestream].forEach((time :number, index :number) => {
                 example[timestream][index] = time - minTime;
             });
         });
@@ -714,27 +714,27 @@ export class TrainingData {
     console.log(`        this.timeSteps=${this.timeSteps}`);
   }
 
-  processExample(example :IMUSensorExample | null | undefined) :any {
-    if (!example) {
-      throw "processExample: missing example";
-    }
+  // processExample(example :IMUSensorExample | null | undefined) :any {
+  //   if (!example) {
+  //     throw "processExample: missing example";
+  //   }
 
-    // remove the time arrays, they aren't really adding much I think
-    Object.keys(example).forEach(stream => {
-        if (stream.endsWith('t')) {
-            delete example[stream];
-        }
-    })
-  }
+  //   // remove the time arrays, they aren't really adding much I think
+  //   Object.keys(example).forEach(stream => {
+  //       if (stream.endsWith('t')) {
+  //           delete example[stream];
+  //       }
+  //   })
+  // }
 
-  processPrediction(example :IMUSensorExample) :Float32Array {
+  processPrediction(example :SensorSeries) :Float32Array {
     if (!example) {
       throw "processExample: missing example";
     }
     if (this._timesteps === 0) {
       throw 'processPrediction but this._timesteps === 0';
     }
-    this.processExample(example);
+    // this.processExample(example);
 
     // trim/extend so same timeSteps
     Object.keys(example).forEach(stream => {
@@ -792,25 +792,25 @@ export class TrainingData {
         // let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
 
         // let dataObject :any;
-        let jsonData: IMUSensorExample;
+        let jsonData: SensorSeries;
         if (typeof example.data === "string") {
           let unknownObject :any = JSON.parse(example.data);
           if (unknownObject.ay) {
-            jsonData = convertIMUSensorJsonToExample(unknownObject);
+            jsonData = sensorSeriesDecode(unknownObject);
           } else if (unknownObject.data) {
-            jsonData = convertIMUSensorJsonToExample(unknownObject.data);
+            jsonData = sensorSeriesDecode(unknownObject.data);
           } else {
             throw "Unrecognized JSON object";
           }
         } else {
-          jsonData = convertIMUSensorJsonToExample(example.data);
+          jsonData = sensorSeriesDecode(example.data);
         }
 
         // const data: IMUSensorExample = convertIMUSensorJsonToExample(blob);
 
 
         // const jsonData :IMUSensorExample = gesture.data!;
-        this.processExample(jsonData);
+        // this.processExample(jsonData);
 
         Object.keys(jsonData!).forEach(a => axesSet[a] = true);
         data[action].push({data:jsonData, url:example.name || example.url as string});

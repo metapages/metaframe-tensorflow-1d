@@ -2,9 +2,8 @@ import { Metaframe, isIframe } from "metaframe";
 import * as tf from '@tensorflow/tfjs';
 import { Rank } from '@tensorflow/tfjs';
 import {TrainingData} from './TrainingData';
-import { PredictionInput, PredictionResult, TrainingDataSet, convertIMUSensorJsonToExample, IMUSensorExample, IMUSensorJson } from './metaframe';
+import { PredictionInput, PredictionResult, TrainingDataSet, SensorSeries, SensorSeriesBase64, sensorSeriesDecode } from './metaframe';
 import { PersistedModel, PersistedModelJson, PersistedModelMetadata } from './types.d';
-// import { convertIMUSensorJsonToExample, IMUSensorExample, IMUSensorJson} from './lib';
 import {Trainer} from './Trainer';
 import {jsonToModel, modelToJson} from './io';
 
@@ -86,7 +85,7 @@ const setModelCount = async () => {
   document.getElementById('cachebuttoncontent')!.innerText = `Clear cache (${cachedModelCount} models)`;
 }
 
-const processPrediction = (example :IMUSensorExample) :Float32Array => {
+const processPrediction = (example :SensorSeries) :Float32Array => {
     if (!example) {
       throw "processExample: missing example";
     }
@@ -95,7 +94,7 @@ const processPrediction = (example :IMUSensorExample) :Float32Array => {
     }
 
     // remove the time arrays, they aren't really adding much I think
-    Object.keys(example).forEach(stream => {
+    Object.keys(example).forEach((stream:string) => {
         if (stream.endsWith('t')) {
             delete example[stream];
         }
@@ -118,7 +117,7 @@ const processPrediction = (example :IMUSensorExample) :Float32Array => {
     });
 
     // normalize over max over all training examples
-    Object.keys(example).forEach(stream => {
+    Object.keys(example).forEach((stream:string) => {
       example[stream].forEach((val:number, index:number, arr :Float32Array|Int32Array) => {
         arr[index] = val / model!.meta.prediction.maxAbsoluteRawValue;
       });
@@ -128,7 +127,7 @@ const processPrediction = (example :IMUSensorExample) :Float32Array => {
     // TODO can we just create the tensor3d here would it be faster?
     const dataArray = new Float32Array(1 * model.meta.prediction.imageWidth * model.meta.prediction.imageHeight);
     Object.keys(example).forEach((stream, streamIndex) => {
-      const offset = streamIndex * timesteps;
+      const offset :number = streamIndex * timesteps;
       dataArray.set(example[stream], offset);
     });
 
@@ -150,9 +149,9 @@ const predict = async (input :PredictionInput) => {
       return;
   }
 
-    let sampleFloatArrays :IMUSensorExample = (input.data as any ) as IMUSensorExample;
-    if (typeof(sampleFloatArrays.at) === 'string') {
-        sampleFloatArrays = convertIMUSensorJsonToExample((input.data as any ) as IMUSensorJson);
+    let sampleFloatArrays :SensorSeries = input.data;
+    if (typeof(sampleFloatArrays[Object.keys(sampleFloatArrays)[0]]) === 'string') {
+        sampleFloatArrays = sensorSeriesDecode((input.data as any ) as SensorSeriesBase64);
     }
 
     const processedSample = processPrediction(sampleFloatArrays);
@@ -162,7 +161,7 @@ const predict = async (input :PredictionInput) => {
 
     let highest :number = 0;
     let className :string = '';
-    const predictionMap = {};
+    const predictionMap :{[key:string]:any} = {};
 
     model.meta.prediction.classNames.forEach((value, index) => {
         predictionMap[value] = prediction[index];
@@ -332,7 +331,7 @@ const debugTrainOnTempSavedInputs = async () => {
 //     // get the example data wrapper
 //     let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
 //     // get the "raw" data, a Map< sensorname,Float32Array> (e.g. ax=>[1,2,3])
-//     const jsonData :IMUSensorExample = gesture.data!;
+//     const jsonData :SensorSeries = gesture.data!;
 
 //     const rawNumberArray :Float32Array = trainingData.processPrediction(jsonData);
 
@@ -402,7 +401,7 @@ const run = async () => {
     // // get the example data wrapper
     // let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
     // // get the "raw" data, a Map< sensorname,Float32Array> (e.g. ax=>[1,2,3])
-    // const jsonData :IMUSensorExample = gesture.data!;
+    // const jsonData :SensorSeries = gesture.data!;
 
     // predict(jsonData)
     

@@ -1,12 +1,35 @@
 import {
   convertIMUSensorExampleToJson,
-  convertIMUSensorGesture2ToIMUSensorExample,
   convertIMUSensorJsonToExample,
   IMUGestureChunk,
   IMUSensorExample,
-  IMUSensorGesture2,
   IMUSensorJson,
 } from "./metaframe";
+
+export interface IMUSensorGesture2 {
+  ax :number[];
+  ay :number[];
+  az :number[];
+  at :number[];
+  gx :number[];
+  gy :number[];
+  gz :number[];
+  gt :number[];
+}
+
+// the sensor gesture needs to be compacted
+export const convertIMUSensorGesture2ToIMUSensorExample :(gesture:IMUSensorGesture2) => IMUSensorExample = gesture => {
+  return {
+      ax: new Float32Array(gesture.ax),
+      ay: new Float32Array(gesture.ay),
+      az: new Float32Array(gesture.az),
+      at: new Int32Array(gesture.at),
+      gx: new Float32Array(gesture.gx),
+      gy: new Float32Array(gesture.gy),
+      gz: new Float32Array(gesture.gz),
+      gt: new Int32Array(gesture.gt),
+  }
+}
 
 // console.log('convertIMUSensorGesture2ToIMUSensorExample', convertIMUSensorGesture2ToIMUSensorExample);
 // console.log('IMUSensorJson', IMUSensorJson);

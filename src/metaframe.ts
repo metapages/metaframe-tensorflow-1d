@@ -9,10 +9,42 @@ export type Base64String = string;
  * Prediction/training types
  */
 
+/* Generic map of keys to number arrays */
+export interface SensorSeries {[key:string] : Float32Array | Int32Array};
+export interface SensorSeriesBase64 {[key:string] : string };
+
+export const sensorSeriesDecode:(series :SensorSeriesBase64) => SensorSeries = series => {
+  const result :SensorSeries = {};
+  Object.keys(series).forEach(k => base64decode(series[k]));
+  return result;
+}
+
+export const sensorSeriesEncode:(series :SensorSeries) => SensorSeriesBase64 = series => {
+  const result :SensorSeriesBase64 = {};
+  Object.keys(series).forEach(k => base64encode(series[k]));
+  return result;
+}
+
+// export const convertIMUSensorJsonToExample :(example:IMUSensorJson) => IMUSensorExample = example => {
+//   console.log('convertIMUSensorJsonToExample example', example);
+//   return {
+//       ax: new Float32Array(base64decode(example.ax)),
+//       ay: new Float32Array(base64decode(example.ay)),
+//       az: new Float32Array(base64decode(example.az)),
+//       at: new Int32Array(base64decode(example.at)),
+//       gx: new Float32Array(base64decode(example.gx)),
+//       gy: new Float32Array(base64decode(example.gy)),
+//       gz: new Float32Array(base64decode(example.gz)),
+//       gt: new Int32Array(base64decode(example.gt)),
+//   }
+// }
+
+
+
 export interface PredictionInput {
-    data: {[key:string] : string | Float32Array | Int32Array};
-    requestId: string | number;
-  }
+  data: SensorSeries;
+  requestId: string | number;
+}
   
 
 /**
@@ -100,16 +132,6 @@ export interface IMUSensorGesture {
   gyroscope :Array<IMUPoint>;
 }
 
-export interface IMUSensorGesture2 {
-  ax :number[];
-  ay :number[];
-  az :number[];
-  at :number[];
-  gx :number[];
-  gy :number[];
-  gz :number[];
-  gt :number[];
-}
 
 
 export interface IMUGestureChunk {
@@ -163,19 +185,7 @@ export interface IMUSensorExample {
 // }
 
 
-// the sensor gesture needs to be compacted
-export const convertIMUSensorGesture2ToIMUSensorExample :(gesture:IMUSensorGesture2) => IMUSensorExample = gesture => {
-  return {
-      ax: new Float32Array(gesture.ax),
-      ay: new Float32Array(gesture.ay),
-      az: new Float32Array(gesture.az),
-      at: new Int32Array(gesture.at),
-      gx: new Float32Array(gesture.gx),
-      gy: new Float32Array(gesture.gy),
-      gz: new Float32Array(gesture.gz),
-      gt: new Int32Array(gesture.gt),
-  }
-}
+
 
 // the sensor gesture needs to be compacted
 export const convertIMUSensorExampleToJson :(example:IMUSensorExample) => IMUSensorJson = example => {
@@ -190,6 +200,8 @@ export const convertIMUSensorExampleToJson :(example:IMUSensorExample) => IMUSen
       gt: base64encode(example.gt.buffer),
   }
 }
+
+// SensorSeries
 
 // the sensor gesture needs to be compacted
 export const convertIMUSensorJsonToExample :(example:IMUSensorJson) => IMUSensorExample = example => {
