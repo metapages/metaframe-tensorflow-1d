@@ -8,6 +8,9 @@ import {
   IMUSensorJson,
 } from "./metaframe";
 
+// console.log('convertIMUSensorGesture2ToIMUSensorExample', convertIMUSensorGesture2ToIMUSensorExample);
+// console.log('IMUSensorJson', IMUSensorJson);
+
 export class IMUData {
   static fromGesture(): IMUData {
     return new IMUData().gestureBegin();

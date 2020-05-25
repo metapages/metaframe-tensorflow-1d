@@ -57,6 +57,14 @@ run: cert-check
                --hmr-port 3001 \
                index.html
 
+run2: cert-check
+    {{typescriptCheck}}
+    {{parcel}} --port 3000 \
+               --host metaframe-1d-trainer.local \
+               --hmr-hostname metaframe-1d-trainer.local \
+               --hmr-port 3001 \
+               index.html
+
 # Removes generated files
 clean:
     rm -rf {{certs}}

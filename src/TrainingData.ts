@@ -35,8 +35,8 @@
 import * as objectHash from "object-hash";
 // import { TrainingDataSet } from './types';
 import * as tf from '@tensorflow/tfjs';
-import { TrainingDataSet, IMUSensorExample } from './metaframe';
-import {IMUData} from './IMUData';
+import { TrainingDataSet, IMUSensorExample, convertIMUSensorJsonToExample } from './metaframe';
+// import {IMUData} from './IMUData';
 
 // const sensorNames = ['accelerometer', 'gyroscope'];
 // const axes = ['x', 'y', 'z'];
@@ -789,12 +789,31 @@ export class TrainingData {
         }
 
         // console.log('example.data', example.data);
-        let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
-        const jsonData :IMUSensorExample = gesture.data!;
+        // let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
+
+        // let dataObject :any;
+        let jsonData: IMUSensorExample;
+        if (typeof example.data === "string") {
+          let unknownObject :any = JSON.parse(example.data);
+          if (unknownObject.ay) {
+            jsonData = convertIMUSensorJsonToExample(unknownObject);
+          } else if (unknownObject.data) {
+            jsonData = convertIMUSensorJsonToExample(unknownObject.data);
+          } else {
+            throw "Unrecognized JSON object";
+          }
+        } else {
+          jsonData = convertIMUSensorJsonToExample(example.data);
+        }
+
+        // const data: IMUSensorExample = convertIMUSensorJsonToExample(blob);
+
+
+        // const jsonData :IMUSensorExample = gesture.data!;
         this.processExample(jsonData);
 
         Object.keys(jsonData!).forEach(a => axesSet[a] = true);
-        data[action].push({data:gesture.data as IMUSensorExample, url:example.name || example.url as string});
+        data[action].push({data:jsonData, url:example.name || example.url as string});
     });
 
     this._streams = Object.keys(axesSet);
