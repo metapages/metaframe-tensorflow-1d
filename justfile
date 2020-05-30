@@ -9,7 +9,7 @@ HTTPS              := env_var_or_default("HTTPS", "true")
 NPM_TOKEN          := env_var_or_default("NPM_TOKEN", "")
 DENO_DEPS          := invocation_directory() + "/deps.ts"
 # github only publishes from the "docs" directory
-CLIENT_PUBLISH_DIR := invocation_directory() + "/docs"
+CLIENT_PUBLISH_DIR := invocation_directory() + "/docs-temp"
 NPM_PUBLISH_DIR    := invocation_directory() + "/dist"
 
 @_help:
@@ -33,7 +33,7 @@ build: build-client
 build-client:
     mkdir -p {{CLIENT_PUBLISH_DIR}}
     @# Do not delete the sub folders with prior published versions
-    find {{CLIENT_PUBLISH_DIR}}/ -maxdepth 1 -type f -exec rm "{}" \;
+    @#find {{CLIENT_PUBLISH_DIR}}/ -maxdepth 1 -type f -exec rm "{}" \;
     {{typescriptBrowser}} --noEmit
     ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
     @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
@@ -52,11 +52,15 @@ start-server: clean build
 
 # _ensureGitPorcelain test
 # https://zellwk.com/blog/publish-to-npm/
-publishNpm npmversionargs="patch": _ensureGitPorcelain _npmClean test (_npmVersion npmversionargs) npmBuild
+publishNpm npmversionargs="patch": _ensureGitPorcelain _npmClean test (_npmVersion npmversionargs) npmBuild _publishNpm
+
+_publishNpm:
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     console.log("NPM_PUBLISH_DIR={{NPM_PUBLISH_DIR}}");
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
+
+
 
 # bumps version, commits change, git tags
 _npmVersion npmversionargs="patch":
@@ -104,6 +108,7 @@ publishGithubpages: _ensureGitPorcelain
     git checkout docs
     git rebase master
     {{typescriptBrowser}}
+    CLIENT_PUBLISH_DIR
 
 
 
