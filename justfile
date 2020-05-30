@@ -113,7 +113,11 @@ publishGithubpages: _ensureGitPorcelain
     git checkout docs
     git rebase master
     just build-client
-    cp {{CLIENT_PUBLISH_DIR}} docs/v`cat package.json | jq -r .version`
+    find docs/ -maxdepth 1 -type f -exec rm "{}" \;
+    cp -r {{CLIENT_PUBLISH_DIR}} docs/v`cat package.json | jq -r .version`
+    cp {{CLIENT_PUBLISH_DIR}}/* docs/
+    git add --all docs
+    
 
 
 
