@@ -1,8 +1,7 @@
 {
-  "name": "tensorflow-convnet-1d",
-  "version": "1.0.0",
+  "name": "metaframe-predictor-conv-1d-net",
+  "version": "0.1.0",
   "description": "",
-  "main": "server.js",
   "scripts": {
     "fook": "npm run build-server && node server.js",
     "start": "npm run clean && npm run build && node server.js",
@@ -37,6 +36,8 @@
     "staticPath": "src",
     "watcherGlob": "**"
   },
+  "types": "index.d.ts",
+  "main": "docs/index.js",
   "devDependencies": {
     "parcel-plugin-static-files-copy": "^2.3.1"
   }
