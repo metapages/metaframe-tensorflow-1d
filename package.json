@@ -34,7 +34,7 @@
   },
   "staticFiles": {
     "staticPath": "src",
-    "watcherGlob": "**"
+    "watcherGlob": "*metaframe.json"
   },
   "types": "lib.d.ts",
   "main": "lib.js",
