@@ -69,9 +69,10 @@ _ensureGitPorcelain:
     await ensureGitNoUncommitted();
 
 test: npmBuild
-    cd dist && npm link
+    cd {{NPM_PUBLISH_DIR}} && npm link
     just test/test
-    cd dist && npm unlink
+    cd {{NPM_PUBLISH_DIR}} && npm unlink
+    rm -rf {{NPM_PUBLISH_DIR}}
 
 # ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
 # @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
