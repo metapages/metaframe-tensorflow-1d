@@ -83,6 +83,7 @@ test: npmBuild
     cd {{NPM_PUBLISH_DIR}} && npm unlink
     echo "After just test"
     cat package.json | jq .
+    just _npmClean
 
 # ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
 # @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
