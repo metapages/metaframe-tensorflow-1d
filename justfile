@@ -46,7 +46,7 @@ start-server: clean build
 # echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> {{CLIENT_PUBLISH_DIR}}/.npmrc
 # cd {{CLIENT_PUBLISH_DIR}}; npm publish .
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
-publish +npmversionargs="": 
+publish +npmversionargs="patch": 
     #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
     import { npmPublish, npmVersion, printf } from '{{DENO_DEPS}}';
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});

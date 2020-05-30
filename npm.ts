@@ -54,7 +54,6 @@ export const npmPublish :(args:NpmPublishArgs) => Promise<CommandResult> = async
 }
 
 export const npmVersion :(args :{cwd:string, npmVersionArg:string}) => Promise<CommandResult> = async (args) => {
-    let {cwd, npmVersionArg} = args;
-    npmVersionArg = npmVersionArg && npmVersionArg !== '' ? npmVersionArg : 'patch';
+    const {cwd, npmVersionArg} = args;
     return await command(['npm', 'version'].concat(npmVersionArg ? [npmVersionArg] : []), cwd);
 }
