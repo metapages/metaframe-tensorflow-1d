@@ -52,7 +52,12 @@ start-server: clean build
 
 # _ensureGitPorcelain test
 # https://zellwk.com/blog/publish-to-npm/
-publishNpm npmversionargs="patch": _ensureGitPorcelain _npmClean test (_npmVersion npmversionargs) _publishNpm
+publishNpm npmversionargs="patch":
+    just _ensureGitPorcelain
+    just _npmClean
+    just test
+    just _npmVersion {{npmversionargs}}
+    just _publishNpm
 
 _publishNpm: npmBuild
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
@@ -107,8 +112,8 @@ test: npmBuild
 publishGithubpages: _ensureGitPorcelain
     git checkout docs
     git rebase master
-    {{typescriptBrowser}}
-    CLIENT_PUBLISH_DIR
+    just build-client
+    cp {{CLIENT_PUBLISH_DIR}} docs/v`cat package.json | jq -r .version`
 
 
 
