@@ -52,12 +52,12 @@ start-server: clean build
 # cd {{CLIENT_PUBLISH_DIR}}; npm publish .
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
 publish +npmversionargs="patch": (_npmVersion npmversionargs) build-client
-    #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
+    #!/usr/bin/env deno run --allow-read=dist/package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     npmPublish({artifactDirectory:'{{CLIENT_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
 
 publishNpm +npmversionargs="patch": (_npmVersion npmversionargs) npmBuild
-    #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
+    #!/usr/bin/env deno run --allow-read=dist/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     npmPublish({artifactDirectory:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
 
@@ -76,7 +76,7 @@ npmBuild:
 
 # bumps version, commits change, git tags
 _npmVersion +npmversionargs="patch":
-    #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
+    #!/usr/bin/env deno run --allow-run
     import { npmVersion } from '{{DENO_DEPS}}';
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
