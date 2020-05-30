@@ -7,3 +7,8 @@ export {
     npmPublish,
     npmVersion,
 } from "./npm.ts";
+
+export {
+    sprintf,
+    printf,
+} from "https://deno.land/std/fmt/printf.ts";

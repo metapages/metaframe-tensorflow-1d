@@ -48,7 +48,7 @@ start-server: clean build
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
 publish +npmversionargs="": 
     #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
-    import { npmPublish, npmVersion } from '{{DENO_DEPS}}';
+    import { npmPublish, npmVersion, printf } from '{{DENO_DEPS}}';
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
     //npmPublish({artifactDirectory:'{{CLIENT_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
     
