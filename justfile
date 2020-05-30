@@ -59,8 +59,9 @@ publishNpm +npmversionargs="patch": _npmClean (_npmVersion npmversionargs) npmBu
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
 
 # build npm package for publishing
-npmBuild: _npmClean
+npmBuild:
     echo " NPM BUILD"
+    rm -rf {{NPM_PUBLISH_DIR}}
     mkdir -p {{NPM_PUBLISH_DIR}}
     echo "middle just npmBuild"
     cat package.json | jq .
@@ -84,7 +85,7 @@ test: npmBuild
     cd {{NPM_PUBLISH_DIR}} && npm unlink
     echo "After just test"
     cat package.json | jq .
-    just _npmClean
+    rm -rf {{NPM_PUBLISH_DIR}}
 
 # ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
 # @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
