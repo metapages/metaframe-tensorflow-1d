@@ -50,7 +50,7 @@ start-server: clean build
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
 # publish +npmversionargs="patch": (publishNpm npmversionargs) publishGithubPages
 
-# test
+# https://zellwk.com/blog/publish-to-npm/
 publishNpm +npmversionargs="patch": _ensureGitPorcelain test (_npmVersion npmversionargs) npmBuild
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
@@ -95,11 +95,10 @@ _npmVersion +npmversionargs="patch":
     import { npmVersion } from '{{DENO_DEPS}}';
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
-# https://zellwk.com/blog/publish-to-npm/
-publish-npm: _require_NPM_TOKEN build-client
-	@echo "PUBLISHING npm version `cat package.json | jq -r '.version'`"
-	echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> {{CLIENT_PUBLISH_DIR}}/.npmrc
-	cd {{CLIENT_PUBLISH_DIR}}; npm publish .
+# update "docs" branch with the (versioned and default) current build
+publishGithubpages:
+
+
 
 # update branch:glitch to master, triggering a glitch update and rebuild
 publish-glitch: build
