@@ -7,7 +7,7 @@
         "lib": ["es2017", "es7", "es6", "dom"],
         "module": "commonjs",
         "moduleResolution": "node",
-        // "noEmit": true,
+        "noEmit": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
