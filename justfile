@@ -70,7 +70,7 @@ npmBuild:
     rm -rf {{NPM_PUBLISH_DIR}}
     mkdir -p {{NPM_PUBLISH_DIR}}
     echo "middle just npmBuild"
-    cat package.json | jq .
+    # cat package.json | jq .
     cp package.json {{NPM_PUBLISH_DIR}}/
     {{typescriptNpm}}
     echo "end just npmBuild"
@@ -90,7 +90,7 @@ test: npmBuild
     just test/test
     cd {{NPM_PUBLISH_DIR}} && npm unlink
     echo "After just test"
-    cat package.json | jq .
+    # cat package.json | jq .
     rm -rf {{NPM_PUBLISH_DIR}}
 
 # ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
