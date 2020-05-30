@@ -52,11 +52,17 @@ start-server: clean build
 
 # _ensureGitPorcelain test
 # https://zellwk.com/blog/publish-to-npm/
-publishNpm +npmversionargs="patch": _npmClean test (_npmVersion "{{npmversionargs}}") npmBuild
+publishNpm npmversionargs="patch": _npmClean test (_npmVersion npmversionargs) npmBuild
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     console.log("NPM_PUBLISH_DIR={{NPM_PUBLISH_DIR}}");
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
+
+# bumps version, commits change, git tags
+_npmVersion npmversionargs="patch":
+    #!/usr/bin/env deno run --allow-run
+    import { npmVersion } from '{{DENO_DEPS}}';
+    await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
 # build npm package for publishing
 npmBuild:
@@ -91,11 +97,7 @@ test: npmBuild
 # @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
 # cp package.json {{CLIENT_PUBLISH_DIR}}/
 
-# bumps version, commits change, git tags
-_npmVersion +npmversionargs="patch":
-    #!/usr/bin/env deno run --allow-run
-    import { npmVersion } from '{{DENO_DEPS}}';
-    await npmVersion({npmVersionArg:'{{npmversionargs}}'});
+
 
 # update "docs" branch with the (versioned and default) current build
 publishGithubpages:
