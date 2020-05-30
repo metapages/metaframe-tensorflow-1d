@@ -110,13 +110,17 @@ test: npmBuild
 
 # update "docs" branch with the (versioned and default) current build
 publishGithubpages: _ensureGitPorcelain
-    git checkout docs
-    git rebase master
+    @#git checkout docs
+    @#git rebase master
     just build-client
+    mkdir -p docs
     find docs/ -maxdepth 1 -type f -exec rm "{}" \;
     cp -r {{CLIENT_PUBLISH_DIR}} docs/v`cat package.json | jq -r .version`
     cp {{CLIENT_PUBLISH_DIR}}/* docs/
+    cp package.json docs/
     git add --all docs
+    git commit -m 'site v`cat package.json | jq -r .version`'
+    git push origin master
     
 
 
