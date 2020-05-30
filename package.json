@@ -32,7 +32,7 @@
   "engines": {
     "node": "12.x"
   },
-  "staticFiles": {
+  "DISABLEDstaticFiles": {
     "staticPath": "src",
     "watcherGlob": "*metaframe.json"
   },

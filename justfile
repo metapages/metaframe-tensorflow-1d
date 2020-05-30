@@ -9,7 +9,7 @@ HTTPS              := env_var_or_default("HTTPS", "true")
 NPM_TOKEN          := env_var_or_default("NPM_TOKEN", "")
 DENO_DEPS          := invocation_directory() + "/deps.ts"
 # github only publishes from the "docs" directory
-CLIENT_PUBLISH_DIR := invocation_directory() + "/docs-temp"
+CLIENT_PUBLISH_DIR := invocation_directory() + "/.tmp/docs-temp"
 NPM_PUBLISH_DIR    := invocation_directory() + "/dist"
 
 @_help:
@@ -27,19 +27,15 @@ init:
         just _mkcert; \
     fi
 
-build: build-client
+build: build-client build-server build-npm
 
 # build production brower assets
 build-client:
     rm -rf {{CLIENT_PUBLISH_DIR}}
     mkdir -p {{CLIENT_PUBLISH_DIR}}
-    @# Do not delete the sub folders with prior published versions
-    @#find {{CLIENT_PUBLISH_DIR}}/ -maxdepth 1 -type f -exec rm "{}" \;
     {{typescriptBrowser}} --noEmit
     ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
-    @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
     cp package.json {{CLIENT_PUBLISH_DIR}}/
-
 
 build-server:
     rm -rf server.js*
@@ -48,8 +44,9 @@ build-server:
 start-server: clean build
     node server.js
 
-# bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
-# publish +npmversionargs="patch": (publishNpm npmversionargs) publishGithubPages
+publish npmversionargs="patch":
+    just publishNpm {{npmversionargs}}
+    just publishGithubpages
 
 # using justfile dependencies failed, the last command would not run
 # https://zellwk.com/blog/publish-to-npm/
@@ -60,13 +57,11 @@ publishNpm npmversionargs="patch":
     just _npmVersion {{npmversionargs}}
     just _publishNpm
 
-_publishNpm: npmBuild
+_publishNpm: build-npm
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     console.log("NPM_PUBLISH_DIR={{NPM_PUBLISH_DIR}}");
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
-
-
 
 # bumps version, commits change, git tags
 _npmVersion npmversionargs="patch":
@@ -75,7 +70,7 @@ _npmVersion npmversionargs="patch":
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
 # build npm package for publishing
-npmBuild:
+build-npm:
     echo " NPM BUILD"
     rm -rf {{NPM_PUBLISH_DIR}}
     mkdir -p {{NPM_PUBLISH_DIR}}
@@ -95,7 +90,7 @@ _ensureGitPorcelain:
     import { ensureGitNoUncommitted } from '{{DENO_DEPS}}';
     await ensureGitNoUncommitted();
 
-test: npmBuild
+test: build-npm
     cd {{NPM_PUBLISH_DIR}} && npm link
     just test/test
     cd {{NPM_PUBLISH_DIR}} && npm unlink
@@ -103,16 +98,8 @@ test: npmBuild
     # cat package.json | jq .
     rm -rf {{NPM_PUBLISH_DIR}}
 
-# ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
-# @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
-# cp package.json {{CLIENT_PUBLISH_DIR}}/
-
-
-
 # update "docs" branch with the (versioned and default) current build
 publishGithubpages: _ensureGitPorcelain
-    @#git checkout docs
-    @#git rebase master
     just build-client
     mkdir -p docs
     rm -rf docs/v`cat package.json | jq -r .version`
@@ -122,18 +109,15 @@ publishGithubpages: _ensureGitPorcelain
     git add --all docs
     git commit -m 'site v`cat package.json | jq -r .version`'
     git push origin master
-    
 
-
-
-# update branch:glitch to master, triggering a glitch update and rebuild
-publish-glitch: build
-    npm run clean
-    @# delete current glitch branch, no worries, it gets rebuilt every time
-    git branch -D glitch || exit 0
-    git checkout -b glitch
-    git push -u --force origin glitch
-    git checkout master
+# # update branch:glitch to master, triggering a glitch update and rebuild
+# publish-glitch: build
+#     npm run clean
+#     @# delete current glitch branch, no worries, it gets rebuilt every time
+#     git branch -D glitch || exit 0
+#     git checkout -b glitch
+#     git push -u --force origin glitch
+#     git checkout master
 
 # watchexec --watch src --exts ts,html -- just build-client
 # watches and builds browser client assets  (alternative to 'just run')
@@ -167,7 +151,7 @@ run2: cert-check
 # Removes generated files
 clean:
     rm -rf {{certs}}
-    rm -rf node_modules
+    rm -rf .tmp
 
 # DEV: generate TLS certs for HTTPS over localhost https://blog.filippo.io/mkcert-valid-https-certificates-for-localhost/
 _mkcert:
