@@ -50,7 +50,7 @@ start-server: clean build
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
 # publish +npmversionargs="patch": (publishNpm npmversionargs) publishGithubPages
 
-# _ensureGitPorcelain test
+# using justfile dependencies failed, the last command would not run
 # https://zellwk.com/blog/publish-to-npm/
 publishNpm npmversionargs="patch":
     just _ensureGitPorcelain
