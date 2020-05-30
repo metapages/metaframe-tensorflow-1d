@@ -57,11 +57,13 @@ publishNpm +npmversionargs="patch": _ensureGitPorcelain test (_npmVersion npmver
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
 
 # build npm package for publishing
-npmBuild:
-    rm -rf {{NPM_PUBLISH_DIR}}
+npmBuild: _npmClean
     mkdir -p {{NPM_PUBLISH_DIR}}
-    {{typescriptNpm}}
     cp package.json {{NPM_PUBLISH_DIR}}/
+    {{typescriptNpm}}
+
+_npmClean:
+    rm -rf {{NPM_PUBLISH_DIR}}
 
 _ensureGitPorcelain:
     #!/usr/bin/env deno run --allow-run
@@ -72,7 +74,6 @@ test: npmBuild
     cd {{NPM_PUBLISH_DIR}} && npm link
     just test/test
     cd {{NPM_PUBLISH_DIR}} && npm unlink
-    rm -rf {{NPM_PUBLISH_DIR}}
 
 # ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
 # @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
