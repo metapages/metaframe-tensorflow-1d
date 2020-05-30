@@ -1,6 +1,6 @@
 {
   "name": "metaframe-predictor-conv-1d-net",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "",
   "scripts": {
     "fook": "npm run build-server && node server.js",
@@ -36,8 +36,8 @@
     "staticPath": "src",
     "watcherGlob": "**"
   },
-  "types": "index.d.ts",
-  "main": "docs/index.js",
+  "types": "lib.d.ts",
+  "main": "lib.js",
   "devDependencies": {
     "parcel-plugin-static-files-copy": "^2.3.1"
   }

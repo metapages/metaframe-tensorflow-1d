@@ -2,12 +2,14 @@
 # serving everything also. Want to api/websocket that punk but not now
 
 parcel             := "./node_modules/parcel-bundler/bin/cli.js"
-typescriptCheck    := "./node_modules/typescript/bin/tsc --build tsconfig-browser.json"
+typescriptClient   := "./node_modules/typescript/bin/tsc --project tsconfig-browser.json"
 certs              := ".certs"
 HTTPS              := env_var_or_default("HTTPS", "true")
 NPM_TOKEN          := env_var_or_default("NPM_TOKEN", "")
 DENO_DEPS          := invocation_directory() + "/deps.ts"
+# github only publishes from the "docs" directory
 CLIENT_PUBLISH_DIR := invocation_directory() + "/docs"
+NPM_PUBLISH_DIR    := invocation_directory() + "/dist"
 
 @_help:
     printf "🏵 Metaframe: Tensorflow 1D conv net\n"
@@ -28,11 +30,14 @@ build: build-client
 
 # build production brower assets
 build-client:
-    rm -rf {{CLIENT_PUBLISH_DIR}}/*
-    {{typescriptCheck}}
+    mkdir -p {{CLIENT_PUBLISH_DIR}}
+    @# Do not delete the sub folders with prior published versions
+    find {{CLIENT_PUBLISH_DIR}}/ -maxdepth 1 -type f -exec rm "{}" \;
+    {{typescriptClient}} --noEmit
     ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
-    cp -r src/* {{CLIENT_PUBLISH_DIR}}/
+    @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
     cp package.json {{CLIENT_PUBLISH_DIR}}/
+
 
 build-server:
     rm -rf server.js*
@@ -46,12 +51,34 @@ start-server: clean build
 # echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> {{CLIENT_PUBLISH_DIR}}/.npmrc
 # cd {{CLIENT_PUBLISH_DIR}}; npm publish .
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
-publish +npmversionargs="patch": 
+publish +npmversionargs="patch": (_npmVersion npmversionargs) build-client
     #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
-    import { npmPublish, npmVersion, printf } from '{{DENO_DEPS}}';
+    import { npmPublish } from '{{DENO_DEPS}}';
+    npmPublish({artifactDirectory:'{{CLIENT_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
+
+publishNpm +npmversionargs="patch": (_npmVersion npmversionargs) npmBuild
+    #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
+    import { npmPublish } from '{{DENO_DEPS}}';
+    npmPublish({artifactDirectory:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
+
+# build npm package for publishing
+npmBuild:
+    @rm -rf {{NPM_PUBLISH_DIR}}
+    @mkdir -p {{NPM_PUBLISH_DIR}}
+    {{typescriptClient}}
+    rm {{NPM_PUBLISH_DIR}}/index.js
+    rm {{NPM_PUBLISH_DIR}}/index.js.map
+    cp package.json {{NPM_PUBLISH_DIR}}/
+
+# ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
+# @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
+# cp package.json {{CLIENT_PUBLISH_DIR}}/
+
+# bumps version, commits change, git tags
+_npmVersion +npmversionargs="patch":
+    #!/usr/bin/env deno run --allow-read=package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
+    import { npmVersion } from '{{DENO_DEPS}}';
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
-    //npmPublish({artifactDirectory:'{{CLIENT_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
-    
 
 # https://zellwk.com/blog/publish-to-npm/
 publish-npm: _require_NPM_TOKEN build-client
@@ -71,7 +98,7 @@ publish-glitch: build
 # watchexec --watch src --exts ts,html -- just build-client
 # watches and builds browser client assets  (alternative to 'just run')
 @watch-client:
-    {{typescriptCheck}}
+    {{typescriptClient}}
     {{parcel}} watch --out-dir public index.html
 
 # paired with watch-client (alternative to 'just run')
@@ -80,7 +107,7 @@ publish-glitch: build
 
 # starts a dev server [port 1234] (alternative to 'just watch-client' && 'just watch-server')
 run: cert-check
-    {{typescriptCheck}}
+    {{typescriptClient}}
     {{parcel}} --cert {{certs}}/cert.pem \
                --key {{certs}}/cert-key.pem \
                --port 3000 \
@@ -90,7 +117,7 @@ run: cert-check
                index.html
 
 run2: cert-check
-    {{typescriptCheck}}
+    {{typescriptClient}}
     {{parcel}} --port 3000 \
                --host metaframe-1d-trainer.local \
                --hmr-hostname metaframe-1d-trainer.local \

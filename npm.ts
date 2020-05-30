@@ -29,11 +29,15 @@ export const command :(cmd :string[], cwd ?:string, pipeToDeno ?:boolean) => Pro
     if (status.code === 0) {
         const output = await process.output();
         result.stdout = new TextDecoder().decode(output);
-        if (pipeToDeno) Deno.stdout.write(output);
+        if (pipeToDeno) {
+            console.log(result.stdout);
+        }
     } else {
         const output = await process.stderrOutput();
         result.stderr = new TextDecoder().decode(output);
-        if (pipeToDeno) Deno.stderr.write(output);
+        if (pipeToDeno) {
+            console.error(result.stderr);
+        }
     }
     return result;
 }
@@ -55,5 +59,9 @@ export const npmPublish :(args:NpmPublishArgs) => Promise<CommandResult> = async
 
 export const npmVersion :(args :{cwd:string, npmVersionArg:string}) => Promise<CommandResult> = async (args) => {
     const {cwd, npmVersionArg} = args;
-    return await command(['npm', 'version'].concat(npmVersionArg ? [npmVersionArg] : []), cwd);
+    const result = await command(['npm', 'version'].concat(npmVersionArg ? [npmVersionArg] : []), cwd);
+    if (result.exitCode !== 0) {
+        Deno.exit(result.exitCode)
+    }
+    return result;
 }
