@@ -1,6 +1,6 @@
 {
   "name": "metaframe-predictor-conv-1d-net",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "",
   "scripts": {
     "fook": "npm run build-server && node server.js",
