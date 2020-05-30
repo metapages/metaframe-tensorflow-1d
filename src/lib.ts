@@ -3,8 +3,6 @@ export {
     TrainingData,
 } from "./TrainingData";
 
-export { Trainer } from "./Trainer";
-
 export {
     jsonToModel,
     modelToJson,

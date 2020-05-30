@@ -3,8 +3,9 @@
         "alwaysStrict": true,
         "baseUrl": ".",
         "declaration": true,
-        "lib": ["es2018", "dom"],
-        "module": "esnext",
+        "esModuleInterop": true,
+        "lib": ["es2017", "es7", "es6", "dom"],
+        "module": "commonjs",
         "moduleResolution": "node",
         // "noEmit": true,
         "noFallthroughCasesInSwitch": true,
@@ -27,5 +28,6 @@
         "./dist",
         "./docs",
         "./*.ts",
+        "./test/",
     ]
 }

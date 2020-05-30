@@ -16,7 +16,9 @@ export interface CommandResult {
     stderr ?:string;
 }
 
-export const command :(cmd :string[], cwd ?:string, pipeToDeno ?:boolean) => Promise<CommandResult> = async (cmd, cwd, pipeToDeno = true) => {
+export const command :(args :{cmd :string[], cwd ?:string, pipeToDeno ?:boolean}) => Promise<CommandResult> = async (args) => {
+    let { cmd, cwd, pipeToDeno} = args;
+    if (pipeToDeno === undefined) pipeToDeno = true;
     printf(colors.bold(cmd.join(' ') + '\n'));
     const process = Deno.run({
         cmd :cmd,
@@ -54,14 +56,23 @@ export const npmPublish :(args:NpmPublishArgs) => Promise<CommandResult> = async
     const packageJson :{version:string} = await readJsonFile(path.join(artifactDirectory, 'package.json'));
     printf(colors.bold(`PUBLISHING npm version ${packageJson.version}\n`));
     await Deno.writeTextFile(path.join(artifactDirectory, '.npmrc'), `//registry.npmjs.org/:_authToken=${npmToken}`);
-    return await command(['npm', 'publish', '.'], artifactDirectory);
+    return await command({cmd:['npm', 'publish', '.'], cwd:artifactDirectory});
 }
 
 export const npmVersion :(args :{cwd:string, npmVersionArg:string}) => Promise<CommandResult> = async (args) => {
     const {cwd, npmVersionArg} = args;
-    const result = await command(['npm', 'version'].concat(npmVersionArg ? [npmVersionArg] : []), cwd);
+    const result = await command({cmd:['npm', 'version'].concat(npmVersionArg ? [npmVersionArg] : []), cwd});
     if (result.exitCode !== 0) {
-        Deno.exit(result.exitCode)
+        Deno.exit(result.exitCode);
     }
     return result;
+}
+
+export const ensureGitNoUncommitted :() => Promise<void> = async () => {
+    const result = await command({cmd:'git status --untracked-files=no --porcelain'.split(' '), pipeToDeno:false});
+    if (result.stdout && result.stdout.length > 0) {
+        printf(colors.red(`Uncommitted git files\n`));
+        printf(colors.red(`${result.stdout}\n`));
+        Deno.exit(1);
+    }
 }

@@ -2,7 +2,8 @@
 # serving everything also. Want to api/websocket that punk but not now
 
 parcel             := "./node_modules/parcel-bundler/bin/cli.js"
-typescriptClient   := "./node_modules/typescript/bin/tsc --project tsconfig-browser.json"
+typescriptBrowser  := "./node_modules/typescript/bin/tsc --project tsconfig-browser.json"
+typescriptNpm      := "./node_modules/typescript/bin/tsc --project tsconfig-npm.json"
 certs              := ".certs"
 HTTPS              := env_var_or_default("HTTPS", "true")
 NPM_TOKEN          := env_var_or_default("NPM_TOKEN", "")
@@ -33,7 +34,7 @@ build-client:
     mkdir -p {{CLIENT_PUBLISH_DIR}}
     @# Do not delete the sub folders with prior published versions
     find {{CLIENT_PUBLISH_DIR}}/ -maxdepth 1 -type f -exec rm "{}" \;
-    {{typescriptClient}} --noEmit
+    {{typescriptBrowser}} --noEmit
     ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
     @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
     cp package.json {{CLIENT_PUBLISH_DIR}}/
@@ -46,29 +47,31 @@ build-server:
 start-server: clean build
     node server.js
 
-# deno  deno.ts
-# @echo "PUBLISHING npm version `cat package.json | jq -r '.version'`"
-# echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> {{CLIENT_PUBLISH_DIR}}/.npmrc
-# cd {{CLIENT_PUBLISH_DIR}}; npm publish .
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
-publish +npmversionargs="patch": (_npmVersion npmversionargs) build-client
-    #!/usr/bin/env deno run --allow-read=dist/package.json --allow-run --allow-write={{invocation_directory()}}/{{CLIENT_PUBLISH_DIR}}/.npmrc
-    import { npmPublish } from '{{DENO_DEPS}}';
-    npmPublish({artifactDirectory:'{{CLIENT_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
+# publish +npmversionargs="patch": (publishNpm npmversionargs) publishGithubPages
 
-publishNpm +npmversionargs="patch": (_npmVersion npmversionargs) npmBuild
+
+publishNpm +npmversionargs="patch": _ensureGitPorcelain test (_npmVersion npmversionargs) npmBuild
     #!/usr/bin/env deno run --allow-read=dist/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     npmPublish({artifactDirectory:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
 
 # build npm package for publishing
 npmBuild:
-    @rm -rf {{NPM_PUBLISH_DIR}}
-    @mkdir -p {{NPM_PUBLISH_DIR}}
-    {{typescriptClient}}
-    rm {{NPM_PUBLISH_DIR}}/index.js
-    rm {{NPM_PUBLISH_DIR}}/index.js.map
+    rm -rf {{NPM_PUBLISH_DIR}}
+    mkdir -p {{NPM_PUBLISH_DIR}}
+    {{typescriptNpm}}
     cp package.json {{NPM_PUBLISH_DIR}}/
+
+_ensureGitPorcelain:
+    #!/usr/bin/env deno run --allow-run
+    import { ensureGitNoUncommitted } from '{{DENO_DEPS}}';
+    await ensureGitNoUncommitted();
+
+test: npmBuild
+    cd dist && npm link
+    just test/test
+    cd dist && npm unlink
 
 # ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
 # @#cp -r src/* {{CLIENT_PUBLISH_DIR}}/
@@ -98,7 +101,7 @@ publish-glitch: build
 # watchexec --watch src --exts ts,html -- just build-client
 # watches and builds browser client assets  (alternative to 'just run')
 @watch-client:
-    {{typescriptClient}}
+    {{typescriptBrowser}}
     {{parcel}} watch --out-dir public index.html
 
 # paired with watch-client (alternative to 'just run')
@@ -107,7 +110,7 @@ publish-glitch: build
 
 # starts a dev server [port 1234] (alternative to 'just watch-client' && 'just watch-server')
 run: cert-check
-    {{typescriptClient}}
+    {{typescriptBrowser}}
     {{parcel}} --cert {{certs}}/cert.pem \
                --key {{certs}}/cert-key.pem \
                --port 3000 \
@@ -117,7 +120,7 @@ run: cert-check
                index.html
 
 run2: cert-check
-    {{typescriptClient}}
+    {{typescriptBrowser}}
     {{parcel}} --port 3000 \
                --host metaframe-1d-trainer.local \
                --hmr-hostname metaframe-1d-trainer.local \
