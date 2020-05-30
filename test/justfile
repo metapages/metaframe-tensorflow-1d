@@ -1,0 +1,6 @@
+init:
+    #npm i
+    npm link metaframe-predictor-conv-1d-net
+
+test: init
+    ./node_modules/ts-node/dist/bin.js test.ts

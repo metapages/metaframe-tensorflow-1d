@@ -45,18 +45,19 @@ export const command :(args :{cmd :string[], cwd ?:string, pipeToDeno ?:boolean}
 }
 
 export interface NpmPublishArgs {
-    artifactDirectory :string;
+    cwd :string;
     npmToken:string;
 }
 /**
  * Point at a directory containing the assets ready to publish
  */
 export const npmPublish :(args:NpmPublishArgs) => Promise<CommandResult> = async (args) => {
-    const {artifactDirectory, npmToken} = args;
-    const packageJson :{version:string} = await readJsonFile(path.join(artifactDirectory, 'package.json'));
+    const {cwd, npmToken} = args;
+    console.log('cwd', cwd);
+    const packageJson :{version:string} = await readJsonFile(path.join(cwd, 'package.json'));
     printf(colors.bold(`PUBLISHING npm version ${packageJson.version}\n`));
-    await Deno.writeTextFile(path.join(artifactDirectory, '.npmrc'), `//registry.npmjs.org/:_authToken=${npmToken}`);
-    return await command({cmd:['npm', 'publish', '.'], cwd:artifactDirectory});
+    await Deno.writeTextFile(path.join(cwd, '.npmrc'), `//registry.npmjs.org/:_authToken=${npmToken}`);
+    return await command({cmd:['npm', 'publish', '.'], cwd});
 }
 
 export const npmVersion :(args :{cwd:string, npmVersionArg:string}) => Promise<CommandResult> = async (args) => {

@@ -1,0 +1,16 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "just test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "metaframe-predictor-conv-1d-net": "^0.1.8",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.8.3"
+  }
+}
