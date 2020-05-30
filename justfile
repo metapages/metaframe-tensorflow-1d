@@ -52,7 +52,7 @@ start-server: clean build
 
 # _ensureGitPorcelain test
 # https://zellwk.com/blog/publish-to-npm/
-publishNpm +npmversionargs="patch": _npmClean test (_npmVersion npmversionargs) npmBuild
+publishNpm +npmversionargs="patch": _npmClean test (_npmVersion "{{npmversionargs}}") npmBuild
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     console.log("NPM_PUBLISH_DIR={{NPM_PUBLISH_DIR}}");
