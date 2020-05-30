@@ -50,8 +50,8 @@ start-server: clean build
 # bump npm version ; commit and git tag ; npmversionargs #https://docs.npmjs.com/cli/version
 # publish +npmversionargs="patch": (publishNpm npmversionargs) publishGithubPages
 
-
-publishNpm +npmversionargs="patch": _ensureGitPorcelain test (_npmVersion npmversionargs) npmBuild
+# test
+publishNpm +npmversionargs="patch": _ensureGitPorcelain  (_npmVersion npmversionargs) npmBuild
     #!/usr/bin/env deno run --allow-read=dist/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
