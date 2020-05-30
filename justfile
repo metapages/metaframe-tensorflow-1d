@@ -27,61 +27,62 @@ init:
         just _mkcert; \
     fi
 
-build: build-client build-server build-npm
+build: browser-assets-build server-build npm-build
 
 # build production brower assets
-build-client:
+browser-assets-build:
     rm -rf {{CLIENT_PUBLISH_DIR}}
     mkdir -p {{CLIENT_PUBLISH_DIR}}
     {{typescriptBrowser}} --noEmit
     ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
     cp package.json {{CLIENT_PUBLISH_DIR}}/
 
-build-server:
+server-build:
     rm -rf server.js*
     ./node_modules/typescript/bin/tsc -p tsconfig-server.json
 
-start-server: clean build
+server-start: clean build
     node server.js
 
+# publish to npm and github pages
 publish npmversionargs="patch":
-    just publishNpm {{npmversionargs}}
-    just publishGithubpages
+    just npm-publish {{npmversionargs}}
+    just githubpages-publish
 
 # using justfile dependencies failed, the last command would not run
 # https://zellwk.com/blog/publish-to-npm/
-publishNpm npmversionargs="patch":
+npm-publish npmversionargs="patch":
     just _ensureGitPorcelain
-    just _npmClean
+    just _npm-clean
     just test
-    just _npmVersion {{npmversionargs}}
-    just _publishNpm
+    just npm-version {{npmversionargs}}
+    just npm-publish
 
-_publishNpm: build-npm
+npm-publish: npm-build
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
     console.log("NPM_PUBLISH_DIR={{NPM_PUBLISH_DIR}}");
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
 
 # bumps version, commits change, git tags
-_npmVersion npmversionargs="patch":
+npm-version npmversionargs="patch":
     #!/usr/bin/env deno run --allow-run
     import { npmVersion } from '{{DENO_DEPS}}';
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
 # build npm package for publishing
-build-npm:
+npm-build:
     echo " NPM BUILD"
     rm -rf {{NPM_PUBLISH_DIR}}
     mkdir -p {{NPM_PUBLISH_DIR}}
-    echo "middle just npmBuild"
+    echo "middle just npm-build"
     # cat package.json | jq .
     cp package.json {{NPM_PUBLISH_DIR}}/
     {{typescriptNpm}}
-    echo "end just npmBuild"
+    echo "end just npm-build"
     cat package.json | jq .
 
-_npmClean:
+_npm-clean:
     echo " NPM CLEAN"
     rm -rf {{NPM_PUBLISH_DIR}}
 
@@ -90,7 +91,7 @@ _ensureGitPorcelain:
     import { ensureGitNoUncommitted } from '{{DENO_DEPS}}';
     await ensureGitNoUncommitted();
 
-test: build-npm
+test: npm-build
     cd {{NPM_PUBLISH_DIR}} && npm link
     just test/test
     cd {{NPM_PUBLISH_DIR}} && npm unlink
@@ -99,8 +100,8 @@ test: build-npm
     rm -rf {{NPM_PUBLISH_DIR}}
 
 # update "docs" branch with the (versioned and default) current build
-publishGithubpages: _ensureGitPorcelain
-    just build-client
+githubpages-publish: _ensureGitPorcelain
+    just browser-assets-build
     mkdir -p docs
     rm -rf docs/v`cat package.json | jq -r .version`
     find docs/ -maxdepth 1 -type f -exec rm "{}" \;
@@ -119,17 +120,17 @@ publishGithubpages: _ensureGitPorcelain
 #     git push -u --force origin glitch
 #     git checkout master
 
-# watchexec --watch src --exts ts,html -- just build-client
+# watchexec --watch src --exts ts,html -- just browser-assets-build
 # watches and builds browser client assets  (alternative to 'just run')
-@watch-client:
+@client-watch:
     {{typescriptBrowser}}
     {{parcel}} watch --out-dir public index.html
 
-# paired with watch-client (alternative to 'just run')
+# paired with client-watch (alternative to 'just run')
 @watch-server:
-    watchexec --restart --watch server.ts -- "npm run build-server && HTTPS={{HTTPS}} node server.js"
+    watchexec --restart --watch server.ts -- "npm run server-build && HTTPS={{HTTPS}} node server.js"
 
-# starts a dev server [port 1234] (alternative to 'just watch-client' && 'just watch-server')
+# starts a dev server [port 1234] (alternative to 'just client-watch' && 'just watch-server')
 run: cert-check
     {{typescriptBrowser}}
     {{parcel}} --cert {{certs}}/cert.pem \
