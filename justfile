@@ -31,6 +31,7 @@ build: build-client
 
 # build production brower assets
 build-client:
+    rm -rf {{CLIENT_PUBLISH_DIR}}
     mkdir -p {{CLIENT_PUBLISH_DIR}}
     @# Do not delete the sub folders with prior published versions
     @#find {{CLIENT_PUBLISH_DIR}}/ -maxdepth 1 -type f -exec rm "{}" \;
