@@ -53,11 +53,11 @@ type SensorJson = {data:SensorSeries, url:string};
 export class TrainingData {
     trainingDataJson:TrainingDataSet;
     
-    // action: {data:exampleData, url:title}
+    // label: {data:exampleData, url:title}
     // <GestureName, Array<SensorJson>>
     data:{ [key: string]: SensorJson[]; } = {}; // Final processed data
-    dataArrays:any = {};
-    _classes:string[] = [];
+    // 
+    _labels:string[] = [];
     // e.g. [ ax ay az gx gy gz ] computed from examples
     _streams :string[] = [];
 
@@ -271,7 +271,7 @@ export class TrainingData {
   // }
 
   get classNames() {
-    return this._classes;
+    return this._labels;
   }
 
   get gestureNames() {
@@ -279,7 +279,7 @@ export class TrainingData {
   }
 
   get numClasses() {
-    return this._classes.length;
+    return this._labels.length;
   }
 
   get imageWidth() {
@@ -481,7 +481,7 @@ export class TrainingData {
 //       result[labelName] = [];
 //     });
 
-//     const totalExampleCount = Object.keys(this.data).reduce((cur, action) => cur + this.data[action].length, 0);
+//     const totalExampleCount = Object.keys(this.data).reduce((cur, label) => cur + this.data[label].length, 0);
 //     const exampleIndices = Array.apply(null, {length: totalExampleCount}).map(Number.call, Number);
 //     exampleIndices.forEach(exampleIndex => {
 //       const labelArray = this.bigFatLabelArray.slice(exampleIndex * this.numClasses, (exampleIndex * this.numClasses) + this.numClasses);
@@ -509,7 +509,7 @@ export class TrainingData {
 //   }
 
 
-  allNonTimeValues(iterateFunc :(dataPoint :number, dataPointIndex :number, data :Float32Array, stream:string, exampleIndex:number, gesturename:string)=>void) {// iterateFunc: (value, index, array, coordinate<x|y|z>, sensor <accelerometer|gyroscope>, exampleIndex, action)
+  allNonTimeValues(iterateFunc :(dataPoint :number, dataPointIndex :number, data :Float32Array, stream:string, exampleIndex:number, gesturename:string)=>void) {// iterateFunc: (value, index, array, coordinate<x|y|z>, sensor <accelerometer|gyroscope>, exampleIndex, label)
     this.allNonTimeSensorStreams((sensorArray :Float32Array, sensorname:string, exampleIndex:number, gestureName:string) => {
         sensorArray.forEach((sensorDataPoint :number, sensorDataPointIndex :number) => {
             iterateFunc(sensorDataPoint, sensorDataPointIndex, sensorArray, sensorname, exampleIndex, gestureName);
@@ -517,7 +517,7 @@ export class TrainingData {
     });
   }
 
-//   allTimes(iterateFunc :(data :IMUSensorExample, sensorname:string, exampleIndex:number, gesturename:string)=>void) {// iterateFunc: (value, array, index, 't', sensor <accelerometer|gyroscope>, exampleIndex, action)
+//   allTimes(iterateFunc :(data :IMUSensorExample, sensorname:string, exampleIndex:number, gesturename:string)=>void) {// iterateFunc: (value, array, index, 't', sensor <accelerometer|gyroscope>, exampleIndex, label)
 //     this.allSensorStreams((sensorArrays, sensor, exampleIndex, gestureName) => {
 //       sensorArrays.t.forEach((sensorDataPoint, sensorDataPointIndex) => {
 //         iterateFunc(sensorDataPoint, sensorArrays, sensorDataPointIndex, 't', sensor, exampleIndex, gestureName);
@@ -525,12 +525,11 @@ export class TrainingData {
 //     });
 //   }
 
-  allSensorStreams(iterateFunc :(data :Float32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
+  allSensorStreams(iterateFunc :(data :Float32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, label)
     Object.keys(this.data).forEach((gestureName :string) => {
       const examples = this.data[gestureName];
       examples.forEach((exampleBlob, exampleIndex) => {
         const example = exampleBlob.data;
-        // this._a
         this._streams.forEach((sensorName :string) => {
           iterateFunc(example[sensorName], sensorName, exampleIndex, gestureName);
         });
@@ -538,12 +537,11 @@ export class TrainingData {
     });
   }
 
-  allNonTimeSensorStreams(iterateFunc :(data :Float32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
+  allNonTimeSensorStreams(iterateFunc :(data :Float32Array, sensorname:string, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, label)
     Object.keys(this.data).forEach((gestureName :string) => {
       const examples = this.data[gestureName];
       examples.forEach((exampleBlob, exampleIndex) => {
         const example = exampleBlob.data;
-        // this._a
         this._streams.forEach((sensorName :string) => {
             if (sensorName.endsWith('t')) {
                 return;
@@ -554,7 +552,7 @@ export class TrainingData {
     });
   }
 
-  allExamples(iterateFunc :(data :SensorSeries, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, action)
+  allExamples(iterateFunc :(data :SensorSeries, exampleIndex:number, gesturename:string)=>void) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, label)
     Object.keys(this.data).forEach((gestureName :string) => {
       const examples = this.data[gestureName];
       examples.forEach((exampleBlob, exampleIndex) => {
@@ -597,7 +595,7 @@ export class TrainingData {
   // Time starts at zero (absolute time is recorded)
   zeroTime() {
     console.log('    zeroing time...');
-    // iterateFunc: (arrays of sensor data points, sensor <accelerometer|gyroscope>, exampleIndex, action)
+    // iterateFunc: (arrays of sensor data points, sensor <accelerometer|gyroscope>, exampleIndex, label)
     this.allExamples((example) => {
         const timeStreams = this._streams.filter(s => s.endsWith('t'));
 
@@ -639,10 +637,19 @@ export class TrainingData {
     let max = 0;
     let maxAll = 0;
     const streamsWithoutTime = this._streams.filter(s => !s.endsWith('t'));
+    console.log('streamsWithoutTime', streamsWithoutTime);
+    console.log('this.data', this.data);
     this.allExamples((example, _, gesture) => {
-        // control examples don't count
+      // control examples don't count
+      console.log(`trimToLongestNonZeroGesture looping in allExamples gesture=${gesture}`);
+      console.log('this._streams', this._streams);
+      console.log('example', example);
+      console.log('Object.keys(example)', Object.keys(example));
+      
       if (gesture != '_') {
         // just grab the length of the first stream, assume all the same length
+        console.log('this._streams[0]', this._streams[0]);
+        console.log('Object.keys(example)', Object.keys(example));
         let lastNonZero = example[this._streams[0]].length - 1;
         for ( ; lastNonZero >= 0;lastNonZero--) {
             // if any stream (ignoring time) contain a non-zero value, this is the end of the actual stream
@@ -772,39 +779,40 @@ export class TrainingData {
 
   async load() {
     console.log(`Begin loading examples from ${this.trainingDataJson.examples.length} gestures and converting to float arrays...`);
-    this.data = {};// <action, [{url:string,data:{x|y|z:Float32Array,t:Int32Array}}]>
-    // const promises = [];
+    this.data = {};// <label, [{url:string,data:{x|y|z:Float32Array,t:Int32Array}}]>
     // Load all the JSON blobs async
-    this.data = {};
     const data = this.data;
     this._streams = [];
     const axesSet :{[key:string]:boolean}= {};
     this.trainingDataJson.examples.forEach((example) => {
-        const action = example.label;
-        if (!data[action]) {
-            data[action] = [];
+        const label = example.label;
+        console.log('label', label);
+        // console.log('example', example);
+        if (!data[label]) {
+            data[label] = [];
         }
-        if (example.encoding === 'base64') {
-            example.encoding
-        }
+        // if (example.encoding === 'base64') {
+        //     example.encoding
+        // }
 
         // console.log('example.data', example.data);
         // let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
 
         // let dataObject :any;
-        let jsonData: SensorSeries;
-        if (typeof example.data === "string") {
-          let unknownObject :any = JSON.parse(example.data);
-          if (unknownObject.ay) {
-            jsonData = sensorSeriesDecode(unknownObject);
-          } else if (unknownObject.data) {
-            jsonData = sensorSeriesDecode(unknownObject.data);
-          } else {
-            throw "Unrecognized JSON object";
-          }
-        } else {
-          jsonData = sensorSeriesDecode(example.data);
-        }
+        
+        const jsonData: SensorSeries = sensorSeriesDecode(example.data.data);
+        // if (typeof example.data === "string") {
+        //   let unknownObject :any = JSON.parse(example.data);
+        //   if (unknownObject.ay) {
+        //     jsonData = sensorSeriesDecode(unknownObject);
+        //   } else if (unknownObject.data) {
+        //     jsonData = sensorSeriesDecode(unknownObject.data);
+        //   } else {
+        //     throw "Unrecognized JSON object";
+        //   }
+        // } else {
+        //   jsonData = sensorSeriesDecode(example.data);
+        // }
 
         // const data: IMUSensorExample = convertIMUSensorJsonToExample(blob);
 
@@ -813,13 +821,13 @@ export class TrainingData {
         // this.processExample(jsonData);
 
         Object.keys(jsonData!).forEach(a => axesSet[a] = true);
-        data[action].push({data:jsonData, url:example.name || example.url as string});
+        data[label].push({data:jsonData, url:example.name || example.url as string});
     });
 
     this._streams = Object.keys(axesSet);
     this._streams.sort();
-    this._classes = Object.keys(this.data);
-  
+    this._labels = Object.keys(this.data);
+    console.log(`labels: [  ${this._labels.join('  |  ')}  ]`);
     console.log('    done loading raw gesture data, begin preprocessing...');
     this.trimToLongestNonZeroGesture();
     this.normalize();
@@ -834,7 +842,7 @@ export class TrainingData {
 
     console.log('    converting to large combined float arrays...');
     // Building data and label arrays
-    const totalExampleCount = Object.keys(this.data).reduce((cur, action) => cur + this.data[action].length, 0);
+    const totalExampleCount = Object.keys(this.data).reduce((cur, label) => cur + this.data[label].length, 0);
     this.bigFatDataArray = new Float32Array(totalExampleCount * this.imageSize);
     this.bigFatLabelArray = new Uint8Array(totalExampleCount * this.numClasses);
     

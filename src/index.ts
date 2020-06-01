@@ -361,11 +361,15 @@ const debugTrainOnTempSavedInputs = async () => {
 
 const run = async () => {
 
-    metaframe.onInputs((inputs :any) => {
-      console.log('onInputs', inputs);
-    })
+    // metaframe.onInputs((inputs :any) => {
+    //   console.log('onInputs', inputs);
+    // })
     metaframe.onInput('training', (t :TrainingDataSet) => {
-      console.log('got metaframe input TrainingDataSet')
+      console.log('got metaframe input TrainingDataSet', t);
+      if (!t.examples) {
+        updateMessage('inputs["training"] (type TrainingDataSet) is missing field: "examples"', 'error');
+        return;
+      }
       // localStorage.setItem(`TrainingDataSet${id}`, JSON.stringify(t));
       onNewTrainingData(t);
     });

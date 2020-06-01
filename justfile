@@ -21,12 +21,6 @@ NPM_PUBLISH_DIR    := invocation_directory() + "/dist"
 init:
     npm i
 
-# Idempotent. 
-@cert-check:
-    if [ ! -f {{certs}}/cert-key.pem ]; then \
-        just _mkcert; \
-    fi
-
 build: browser-assets-build server-build npm-build
 
 # build production brower assets
@@ -44,24 +38,20 @@ server-build:
 server-start: clean build
     node server.js
 
-# publish to npm and github pages
-publish npmversionargs="patch":
-    just npm-publish {{npmversionargs}}
-    just githubpages-publish
-
 # using justfile dependencies failed, the last command would not run
-# https://zellwk.com/blog/publish-to-npm/
-npm-publish npmversionargs="patch":
+# publish to npm and github pages.
+publish npmversionargs="patch":
     just _ensureGitPorcelain
     just _npm-clean
     just test
     just npm-version {{npmversionargs}}
-    just npm-publish
+    just npm-publish {{npmversionargs}}
+    just githubpages-publish
 
+# https://zellwk.com/blog/publish-to-npm/
 npm-publish: npm-build
     #!/usr/bin/env deno run --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
     import { npmPublish } from '{{DENO_DEPS}}';
-    console.log("NPM_PUBLISH_DIR={{NPM_PUBLISH_DIR}}");
     npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
 
 # bumps version, commits change, git tags
@@ -72,18 +62,12 @@ npm-version npmversionargs="patch":
 
 # build npm package for publishing
 npm-build:
-    echo " NPM BUILD"
     rm -rf {{NPM_PUBLISH_DIR}}
     mkdir -p {{NPM_PUBLISH_DIR}}
-    echo "middle just npm-build"
-    # cat package.json | jq .
     cp package.json {{NPM_PUBLISH_DIR}}/
     {{typescriptNpm}}
-    echo "end just npm-build"
-    cat package.json | jq .
 
 _npm-clean:
-    echo " NPM CLEAN"
     rm -rf {{NPM_PUBLISH_DIR}}
 
 _ensureGitPorcelain:
@@ -95,8 +79,6 @@ test: npm-build
     cd {{NPM_PUBLISH_DIR}} && npm link
     just test/test
     cd {{NPM_PUBLISH_DIR}} && npm unlink
-    echo "After just test"
-    # cat package.json | jq .
     rm -rf {{NPM_PUBLISH_DIR}}
 
 # update "docs" branch with the (versioned and default) current build
@@ -131,7 +113,7 @@ githubpages-publish: _ensureGitPorcelain
     watchexec --restart --watch server.ts -- "npm run server-build && HTTPS={{HTTPS}} node server.js"
 
 # starts a dev server [port 1234] (alternative to 'just client-watch' && 'just watch-server')
-run: cert-check
+run: _cert-check
     {{typescriptBrowser}}
     {{parcel}} --cert {{certs}}/cert.pem \
                --key {{certs}}/cert-key.pem \
@@ -141,7 +123,7 @@ run: cert-check
                --hmr-port 3001 \
                index.html
 
-run2: cert-check
+run-no-https: _cert-check
     {{typescriptBrowser}}
     {{parcel}} --port 3000 \
                --host metaframe-1d-trainer.local \
@@ -153,6 +135,12 @@ run2: cert-check
 clean:
     rm -rf {{certs}}
     rm -rf .tmp
+
+# Idempotent. Ensures mkcert https certificates.
+@_cert-check:
+    if [ ! -f {{certs}}/cert-key.pem ]; then \
+        just _mkcert; \
+    fi
 
 # DEV: generate TLS certs for HTTPS over localhost https://blog.filippo.io/mkcert-valid-https-certificates-for-localhost/
 _mkcert:

@@ -12,6 +12,16 @@ export type Base64String = string;
 /* Generic map of keys to number arrays */
 export interface SensorSeries {[key:string] : Float32Array};
 export interface SensorSeriesBase64 {[key:string] : string };
+/* Main persisted form of a single complete sensor example (e.g. a gesture) */
+export interface PredictionInputEncoded {
+  data: SensorSeriesBase64;
+  requestId ?: string | number;
+} 
+
+export interface PredictionInput {
+  data: SensorSeries;
+  requestId ?: string | number;
+}
 
 export const sensorSeriesDecode:(series :SensorSeriesBase64) => SensorSeries = series => {
   const result :SensorSeries = {};
@@ -41,11 +51,7 @@ export const sensorSeriesEncode:(series :SensorSeries) => SensorSeriesBase64 = s
 
 
 
-export interface PredictionInput {
-  data: SensorSeries;
-  requestId: string | number;
-}
-  
+
 
 /**
  * This is the output from an input prection
@@ -57,7 +63,7 @@ export interface PredictionResult {
   predictions: {
     [className: string]: number
   };
-  requestId: string | number;
+  requestId ?: string | number;
   modelHash: string;
   modelId?: string;
 }
@@ -66,9 +72,8 @@ export interface TrainingDataPoint {
   version?: string; // TODO: solve versioning since this is a blob to the graphql API
   name?: string;
   label: string;
-  encoding?: "json" | "base64";
   url?: string;
-  data: string; // JSON transfer uses Base64String
+  data: PredictionInputEncoded; // JSON transfer uses Base64String
 }
 
 export interface TrainingDataSet {
