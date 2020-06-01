@@ -1,6 +1,6 @@
 {
   "name": "metaframe-predictor-conv-1d-net",
-  "version": "0.2.23",
+  "version": "0.2.24",
   "description": "",
   "scripts": {
     "fook": "npm run build-server && node server.js",
@@ -35,7 +35,11 @@
   "staticFiles": {
     "staticPath": "src",
     "watcherGlob": "*metaframe.json",
-    "excludeGlob": ["types/*", "*.ts", "README.md"]
+    "excludeGlob": [
+      "types/*",
+      "*.ts",
+      "README.md"
+    ]
   },
   "types": "lib.d.ts",
   "main": "lib.js",
