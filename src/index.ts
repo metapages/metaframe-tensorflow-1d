@@ -144,15 +144,15 @@ const predict = async (input :PredictionInput) => {
         return;
     }
 
-    if (!input.data) {
-      updateMessage('Asked to predict but bad input', 'warning');
+    if (!input.series) {
+      updateMessage('Asked to predict but input lacks "series" field', 'warning');
       return;
   }
 
-    let sampleFloatArrays :SensorSeries = input.data;
-    if (typeof(sampleFloatArrays[Object.keys(sampleFloatArrays)[0]]) === 'string') {
-        sampleFloatArrays = sensorSeriesDecode((input.data as any ) as SensorSeriesBase64);
-    }
+    let sampleFloatArrays :SensorSeries = input.series;
+    // if (typeof(sampleFloatArrays[Object.keys(sampleFloatArrays)[0]]) === 'string') {
+    //     sampleFloatArrays = sensorSeriesDecode((input.dseriesata as any ) as SensorSeriesBase64);
+    // }
 
     const processedSample = processPrediction(sampleFloatArrays);
 

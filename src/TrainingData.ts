@@ -800,7 +800,7 @@ export class TrainingData {
 
         // let dataObject :any;
         
-        const jsonData: SensorSeries = sensorSeriesDecode(example.data.data);
+        const jsonData: SensorSeries = sensorSeriesDecode(example.data.series);
         // if (typeof example.data === "string") {
         //   let unknownObject :any = JSON.parse(example.data);
         //   if (unknownObject.ay) {
