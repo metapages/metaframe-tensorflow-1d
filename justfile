@@ -45,7 +45,7 @@ publish npmversionargs="patch":
     just _npm-clean
     just test
     just npm-version {{npmversionargs}}
-    just npm-publish {{npmversionargs}}
+    just npm-publish
     just githubpages-publish
 
 # https://zellwk.com/blog/publish-to-npm/
