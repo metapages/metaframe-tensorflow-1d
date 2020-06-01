@@ -35,7 +35,7 @@
   "staticFiles": {
     "staticPath": "src",
     "watcherGlob": "*metaframe.json",
-    "excludeGlob": ["types", "*.ts", "README.md"]
+    "excludeGlob": ["types/*", "*.ts", "README.md"]
   },
   "types": "lib.d.ts",
   "main": "lib.js",
