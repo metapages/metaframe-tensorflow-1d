@@ -14,12 +14,12 @@ export interface SensorSeries {[key:string] : Float32Array};
 export interface SensorSeriesBase64 {[key:string] : string };
 /* Main persisted form of a single complete sensor example (e.g. a gesture) */
 export interface PredictionInputEncoded {
-  data: SensorSeriesBase64;
+  series: SensorSeriesBase64;
   requestId ?: string | number;
 } 
 
 export interface PredictionInput {
-  data: SensorSeries;
+  series: SensorSeries;
   requestId ?: string | number;
 }
 
