@@ -787,7 +787,7 @@ export class TrainingData {
     this.trainingDataJson.examples.forEach((example) => {
         const label = example.label;
         console.log('label', label);
-        // console.log('example', example);
+        console.log('example', example);
         if (!data[label]) {
             data[label] = [];
         }
@@ -801,6 +801,7 @@ export class TrainingData {
         // let dataObject :any;
         
         const jsonData: SensorSeries = sensorSeriesDecode(example.data.series);
+        console.log('jsonData', jsonData);
         // if (typeof example.data === "string") {
         //   let unknownObject :any = JSON.parse(example.data);
         //   if (unknownObject.ay) {
@@ -821,7 +822,8 @@ export class TrainingData {
         // this.processExample(jsonData);
 
         Object.keys(jsonData!).forEach(a => axesSet[a] = true);
-        data[label].push({data:jsonData, url:example.name || example.url as string});
+        const processedExample :SensorJson = {data:jsonData, url:(example.name || example.url) as string};
+        data[label].push(processedExample);
     });
 
     this._streams = Object.keys(axesSet);

@@ -25,13 +25,13 @@ export interface PredictionInput {
 
 export const sensorSeriesDecode:(series :SensorSeriesBase64) => SensorSeries = series => {
   const result :SensorSeries = {};
-  Object.keys(series).forEach(k => base64decode(series[k]));
+  Object.keys(series).forEach(k => result[k] = new Float32Array(base64decode(series[k])));
   return result;
 }
 
 export const sensorSeriesEncode:(series :SensorSeries) => SensorSeriesBase64 = series => {
   const result :SensorSeriesBase64 = {};
-  Object.keys(series).forEach(k => base64encode(series[k]));
+  Object.keys(series).forEach(k => result[k] = base64encode(series[k].buffer));
   return result;
 }
 
