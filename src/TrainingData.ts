@@ -35,7 +35,7 @@
 import * as objectHash from "object-hash";
 // import { TrainingDataSet } from './types';
 import * as tf from '@tensorflow/tfjs';
-import { TrainingDataSet, SensorSeries, sensorSeriesDecode } from './metaframe';
+import { TrainingDataSet, TrainingDataPoint, SensorSeries, sensorSeriesDecode } from './metaframe';
 // import {IMUData} from './IMUData';
 
 // const sensorNames = ['accelerometer', 'gyroscope'];
@@ -637,19 +637,10 @@ export class TrainingData {
     let max = 0;
     let maxAll = 0;
     const streamsWithoutTime = this._streams.filter(s => !s.endsWith('t'));
-    console.log('streamsWithoutTime', streamsWithoutTime);
-    console.log('this.data', this.data);
     this.allExamples((example, _, gesture) => {
-      // control examples don't count
-      console.log(`trimToLongestNonZeroGesture looping in allExamples gesture=${gesture}`);
-      console.log('this._streams', this._streams);
-      console.log('example', example);
-      console.log('Object.keys(example)', Object.keys(example));
-      
+      // control examples don't count      
       if (gesture != '_') {
         // just grab the length of the first stream, assume all the same length
-        console.log('this._streams[0]', this._streams[0]);
-        console.log('Object.keys(example)', Object.keys(example));
         let lastNonZero = example[this._streams[0]].length - 1;
         for ( ; lastNonZero >= 0;lastNonZero--) {
             // if any stream (ignoring time) contain a non-zero value, this is the end of the actual stream
@@ -784,43 +775,12 @@ export class TrainingData {
     const data = this.data;
     this._streams = [];
     const axesSet :{[key:string]:boolean}= {};
-    this.trainingDataJson.examples.forEach((example) => {
+    this.trainingDataJson.examples.forEach((example :TrainingDataPoint) => {
         const label = example.label;
-        console.log('label', label);
-        console.log('example', example);
         if (!data[label]) {
             data[label] = [];
         }
-        // if (example.encoding === 'base64') {
-        //     example.encoding
-        // }
-
-        // console.log('example.data', example.data);
-        // let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
-
-        // let dataObject :any;
-        
         const jsonData: SensorSeries = sensorSeriesDecode(example.data.series);
-        console.log('jsonData', jsonData);
-        // if (typeof example.data === "string") {
-        //   let unknownObject :any = JSON.parse(example.data);
-        //   if (unknownObject.ay) {
-        //     jsonData = sensorSeriesDecode(unknownObject);
-        //   } else if (unknownObject.data) {
-        //     jsonData = sensorSeriesDecode(unknownObject.data);
-        //   } else {
-        //     throw "Unrecognized JSON object";
-        //   }
-        // } else {
-        //   jsonData = sensorSeriesDecode(example.data);
-        // }
-
-        // const data: IMUSensorExample = convertIMUSensorJsonToExample(blob);
-
-
-        // const jsonData :IMUSensorExample = gesture.data!;
-        // this.processExample(jsonData);
-
         Object.keys(jsonData!).forEach(a => axesSet[a] = true);
         const processedExample :SensorJson = {data:jsonData, url:(example.name || example.url) as string};
         data[label].push(processedExample);

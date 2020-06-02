@@ -13,7 +13,7 @@ CLIENT_PUBLISH_DIR := invocation_directory() + "/.tmp/docs-temp"
 NPM_PUBLISH_DIR    := invocation_directory() + "/dist"
 
 @_help:
-    printf "🏵 Metaframe: Tensorflow 1D conv net\n"
+    printf "🏵 Metaframe: Tensorflow 1D conv net:    https://metapages.github.io/metaframe-predictor-conv-1d-net/\n"
     printf "\n"
     just --list
 
@@ -61,14 +61,15 @@ npm-version npmversionargs="patch":
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
 # build npm package for publishing
-npm-build:
-    rm -rf {{NPM_PUBLISH_DIR}}
-    mkdir -p {{NPM_PUBLISH_DIR}}
+npm-build: _npm-clean
+    @# mkdir -p {{NPM_PUBLISH_DIR}}
+    @# rm -rf {{NPM_PUBLISH_DIR}}/*
     cp package.json {{NPM_PUBLISH_DIR}}/
     {{typescriptNpm}}
 
 _npm-clean:
-    rm -rf {{NPM_PUBLISH_DIR}}
+    mkdir -p {{NPM_PUBLISH_DIR}}
+    rm -rf {{NPM_PUBLISH_DIR}}/*
 
 _ensureGitPorcelain:
     #!/usr/bin/env deno run --allow-run
