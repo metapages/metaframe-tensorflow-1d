@@ -9,7 +9,7 @@
 			"type": "./types/TrainingDataSet"
 		},
 		"prediction": {
-			"type": "./types/PredictionInput"
+			"type": "./types/PredictionInputEncoded"
 		},
 		"model": {
 			"type": "./types/PersistedModelJson"
