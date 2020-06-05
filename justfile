@@ -24,7 +24,7 @@ init:
 build: (browser-assets-build "./docs") server-build npm-build
 
 # build production brower assets
-browser-assets-build out-dir="./docs" public-url="/":
+browser-assets-build out-dir="./docs" public-url="./":
     mkdir -p {{out-dir}}
     find {{out-dir}}/ -maxdepth 1 -type f -exec rm "{}" \;
     {{typescriptBrowser}} --noEmit
@@ -82,10 +82,9 @@ test: npm-build
     cd {{NPM_PUBLISH_DIR}} && npm unlink
     rm -rf {{NPM_PUBLISH_DIR}}
 
-# _ensureGitPorcelain    
 # update "docs" branch with the (versioned and default) current build
-githubpages-publish: 
-    just browser-assets-build ./docs/v`cat package.json | jq -r .version` v`cat package.json | jq -r .version`
+githubpages-publish: _ensureGitPorcelain
+    just browser-assets-build ./docs/v`cat package.json | jq -r .version`
     just browser-assets-build
     git add --all docs
     git commit -m "site v`cat package.json | jq -r .version`"
