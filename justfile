@@ -21,15 +21,15 @@ NPM_PUBLISH_DIR    := invocation_directory() + "/dist"
 init:
     npm i
 
-build: browser-assets-build server-build npm-build
+build: (browser-assets-build "./docs") server-build npm-build
 
 # build production brower assets
-browser-assets-build:
-    rm -rf {{CLIENT_PUBLISH_DIR}}
-    mkdir -p {{CLIENT_PUBLISH_DIR}}
+browser-assets-build out-dir="./docs" public-url="/":
+    mkdir -p {{out-dir}}
+    find {{out-dir}}/ -maxdepth 1 -type f -exec rm "{}" \;
     {{typescriptBrowser}} --noEmit
-    ./node_modules/parcel-bundler/bin/cli.js build --out-dir {{CLIENT_PUBLISH_DIR}} index.html
-    cp package.json {{CLIENT_PUBLISH_DIR}}/
+    ./node_modules/parcel-bundler/bin/cli.js build index.html --out-dir={{out-dir}} --public-url={{public-url}} 
+    cp package.json {{out-dir}}/
 
 server-build:
     rm -rf server.js*
@@ -82,17 +82,19 @@ test: npm-build
     cd {{NPM_PUBLISH_DIR}} && npm unlink
     rm -rf {{NPM_PUBLISH_DIR}}
 
+# _ensureGitPorcelain    
 # update "docs" branch with the (versioned and default) current build
-githubpages-publish: _ensureGitPorcelain
-    just browser-assets-build
+githubpages-publish: 
     mkdir -p docs
-    rm -rf docs/v`cat package.json | jq -r .version`
-    find docs/ -maxdepth 1 -type f -exec rm "{}" \;
-    cp -r {{CLIENT_PUBLISH_DIR}} docs/v`cat package.json | jq -r .version`
-    cp {{CLIENT_PUBLISH_DIR}}/* docs/
-    git add --all docs
-    git commit -m 'site v`cat package.json | jq -r .version`'
-    git push origin master
+    # rm -rf docs/v`cat package.json | jq -r .version`
+    # find docs/ -maxdepth 1 -type f -exec rm "{}" \;
+    just browser-assets-build ./docs/v`cat package.json | jq -r .version` v`cat package.json | jq -r .version`
+    just browser-assets-build
+    # cp -r {{CLIENT_PUBLISH_DIR}} docs/v`cat package.json | jq -r .version`
+    # cp {{CLIENT_PUBLISH_DIR}}/* docs/
+    #git add --all docs
+    #git commit -m 'site v`cat package.json | jq -r .version`'
+    #git push origin master
 
 # # update branch:glitch to master, triggering a glitch update and rebuild
 # publish-glitch: build
