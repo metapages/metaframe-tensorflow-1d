@@ -3,13 +3,14 @@ import * as tf from "@tensorflow/tfjs";
 import {Rank} from "@tensorflow/tfjs";
 import {TrainingData} from "./TrainingData";
 import {
+  predictionDecode,
   PredictionInput,
+  PredictionInputEncoded,
   PredictionResult,
-  TrainingDataSet,
   SensorSeries,
   SensorSeriesBase64,
   sensorSeriesDecode,
-  predictionDecode,
+  TrainingDataSet,
 } from "./metaframe";
 import {PersistedModel, PersistedModelJson, PersistedModelMetadata} from "./types.d";
 import {Trainer} from "./Trainer";
