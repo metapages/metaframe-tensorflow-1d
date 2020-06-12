@@ -21,14 +21,15 @@ export {
 
 
 export {
+    PredictionInput,
+    PredictionInputEncoded,
+    PredictionMetadata,
+    PredictionResult,
     SensorSeries,
     SensorSeriesBase64,
     sensorSeriesDecode,
     sensorSeriesEncode,
-    PredictionInput,
-    PredictionResult,
     TrainingDataPoint,
     TrainingDataSet,
-    PredictionMetadata,
     TrainingMetadata,
 } from "./metaframe";
