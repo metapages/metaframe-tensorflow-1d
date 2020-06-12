@@ -8,7 +8,8 @@ import {
   TrainingDataSet,
   SensorSeries,
   SensorSeriesBase64,
-  sensorSeriesDecode
+  sensorSeriesDecode,
+  predictionDecode,
 } from "./metaframe";
 import {PersistedModel, PersistedModelJson, PersistedModelMetadata} from "./types.d";
 import {Trainer} from "./Trainer";
@@ -328,7 +329,6 @@ const debugTrainOnTempSavedInputs = async () => {
 //     })!;
 
 //      get the example data wrapper
-//     let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
 //      get the "raw" data, a Map< sensorname,Float32Array> (e.g. ax=>[1,2,3])
 //     const jsonData :SensorSeries = gesture.data!;
 
@@ -371,7 +371,8 @@ const run = async () => {
     onNewTrainingData(t);
   });
 
-  metaframe.onInput("prediction", (predictionData : PredictionInput) => {
+  metaframe.onInput("prediction", (predictionData : PredictionInputEncoded) => {
+    const predictionInput :PredictionInput = predictionDecode(predictionData);
     console.log("Got input prediction");
     predict(predictionData);
     console.log("Set output prediction");
@@ -400,7 +401,7 @@ const run = async () => {
   // })!;
 
   //  get the example data wrapper
-  // let gesture :IMUData = IMUData.fromObjectOrJsonString(example.data);
+
   //  get the "raw" data, a Map< sensorname,Float32Array> (e.g. ax=>[1,2,3])
   // const jsonData :SensorSeries = gesture.data!;
 

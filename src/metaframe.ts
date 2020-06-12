@@ -29,6 +29,22 @@ export const sensorSeriesDecode:(series :SensorSeriesBase64) => SensorSeries = s
   return result;
 }
 
+export const predictionDecode:(prediction :PredictionInputEncoded) => PredictionInput = prediction => {
+  const result :PredictionInput = {
+    requestId: prediction.requestId,
+    series: sensorSeriesDecode(prediction.series),
+  };
+  return result;
+}
+
+export const predictionEncode:(prediction :PredictionInput) => PredictionInputEncoded = prediction => {
+  const result :PredictionInputEncoded = {
+    requestId: prediction.requestId,
+    series: sensorSeriesEncode(prediction.series),
+  };
+  return result;
+}
+
 export const sensorSeriesEncode:(series :SensorSeries) => SensorSeriesBase64 = series => {
   const result :SensorSeriesBase64 = {};
   Object.keys(series).forEach(k => result[k] = base64encode(series[k].buffer));

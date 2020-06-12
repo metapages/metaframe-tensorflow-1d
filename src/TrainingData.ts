@@ -36,7 +36,6 @@ import * as objectHash from "object-hash";
 // import { TrainingDataSet } from './types';
 import * as tf from '@tensorflow/tfjs';
 import { TrainingDataSet, TrainingDataPoint, SensorSeries, sensorSeriesDecode } from './metaframe';
-// import {IMUData} from './IMUData';
 
 // const sensorNames = ['accelerometer', 'gyroscope'];
 // const axes = ['x', 'y', 'z'];

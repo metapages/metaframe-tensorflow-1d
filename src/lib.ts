@@ -9,12 +9,6 @@ export {
 } from "./io";
 
 export {
-    IMUSensorGesture2,
-    convertIMUSensorGesture2ToIMUSensorExample,
-    IMUData,
-} from "./IMUData";
-
-export {
     base64encode,
     base64decode,
 } from "./base64";
@@ -32,4 +26,6 @@ export {
     TrainingDataPoint,
     TrainingDataSet,
     TrainingMetadata,
+    predictionEncode,
+    predictionDecode,
 } from "./metaframe";

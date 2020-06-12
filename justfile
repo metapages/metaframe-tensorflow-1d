@@ -80,7 +80,7 @@ test: npm-build
     cd {{NPM_PUBLISH_DIR}} && npm link
     just test/test
     cd {{NPM_PUBLISH_DIR}} && npm unlink
-    rm -rf {{NPM_PUBLISH_DIR}}
+    rm -rf {{NPM_PUBLISH_DIR}}/*
 
 # update "docs" branch with the (versioned and default) current build
 githubpages-publish: _ensureGitPorcelain
