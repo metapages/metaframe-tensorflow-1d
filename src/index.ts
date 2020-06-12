@@ -375,7 +375,7 @@ const run = async () => {
   metaframe.onInput("prediction", (predictionData : PredictionInputEncoded) => {
     const predictionInput :PredictionInput = predictionDecode(predictionData);
     console.log("Got input prediction");
-    predict(predictionData);
+    predict(predictionInput);
     console.log("Set output prediction");
   });
 
