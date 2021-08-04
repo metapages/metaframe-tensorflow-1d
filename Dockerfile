@@ -48,3 +48,7 @@ WORKDIR /workspace
 ADD package.json ./
 ADD package-lock.json ./
 RUN npm i
+
+ADD test/package.json ./test/
+ADD test/package-lock.json ./test/
+RUN cd test && npm i
