@@ -12,9 +12,11 @@ RUN apt-get update && apt-get install -y \
   curl \
   jq \
   git \
-  npm \
   && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get install curl software-properties-common
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install nodejs
 
 # RUN apk --no-cache --update add \
 #     bash \
