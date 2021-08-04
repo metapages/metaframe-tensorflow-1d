@@ -45,11 +45,11 @@ RUN VERSION=1.14.1 ; \
     tar xvf watchexec-$VERSION-i686-unknown-linux-musl.tar.xz watchexec-$VERSION-i686-unknown-linux-musl/watchexec -C /usr/bin/ --strip-components=1 && \
     rm -rf watchexec-*
 
-WORKDIR /workspace
-ADD package.json ./
-ADD package-lock.json ./
-RUN npm i
+# WORKDIR /workspace
+# ADD package.json ./
+# ADD package-lock.json ./
+# RUN npm i
 
-ADD test/package.json ./test/
-ADD test/package-lock.json ./test/
-RUN cd test && npm i
+# ADD test/package.json ./test/
+# ADD test/package-lock.json ./test/
+# RUN cd test && npm i
