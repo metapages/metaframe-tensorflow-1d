@@ -1,12 +1,12 @@
 {
   "name": "@metapages/metaframe-tensorflow-1d",
+  "public": true,
   "version": "0.1.2",
   "files": [
     "dist/**/*"
   ],
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
-  "private": false,
   "scripts": {
     "note": "echo 'use just. See README.md'"
   },
