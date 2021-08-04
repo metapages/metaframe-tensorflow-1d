@@ -30,8 +30,7 @@
     "strictNullChecks": true,
     "target": "ESNext",
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["vite/client"],
   },
   "exclude": ["node_modules"],
-  "include": ["src/lib/**/*"]
+  "include": ["test.ts"]
 }

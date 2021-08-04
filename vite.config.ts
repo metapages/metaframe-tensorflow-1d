@@ -1,33 +1,44 @@
 import * as fs from "fs";
-import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import typescript from '@rollup/plugin-typescript';
-import preact from "@preact/preset-vite";
+import preactRefresh from '@prefresh/vite'
+import commonjs from '@rollup/plugin-commonjs';
 
 const APP_FQDN = process.env.APP_FQDN || "metaframe1.dev";
 const APP_PORT = process.env.APP_PORT || "443";
+const DOCS_SUB_DIR = process.env.DOCS_SUB_DIR;
+console.log('DOCS_SUB_DIR', DOCS_SUB_DIR);
+
 const fileKey = `./.certs/${APP_FQDN}-key.pem`;
 const fileCert = `./.certs/${APP_FQDN}.pem`;
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
+  base: DOCS_SUB_DIR && DOCS_SUB_DIR !== "" ? `/${DOCS_SUB_DIR}/` : undefined,
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat',
+      "react-dom/test-utils": "preact/test-utils",
     },
   },
+  esbuild: {
+    jsxFactory: 'h',
+    jsxFragment: 'Fragment',
+  },
   plugins: [
-    preact(),
-    typescript({ sourceMap: mode !== 'production', inlineSources: mode !== 'production' }),
+    preactRefresh(),
+    typescript({ outDir: `docs/${DOCS_SUB_DIR}`, sourceMap: true, inlineSources: mode !== 'production' }),
+    // commonjs(),
   ],
   build: {
-    outDir: mode === "production" ? "dist" : "build",
+    outDir: `docs/${DOCS_SUB_DIR}`, //mode === "production" ? "dist" : "build",
     target: 'esnext',
     sourcemap: true,
     minify: mode === 'development' ? false : 'esbuild',
-    emptyOutDir: true,
+    emptyOutDir: false,
   },
-  server: mode === "development" ? {
+  server: {
     open: '/',
     host: APP_FQDN,
     port: parseInt(fs.existsSync(fileKey) ? APP_PORT : "8000"),
@@ -35,11 +46,5 @@ export default defineConfig(({ command, mode }) => ({
       key: fs.readFileSync(fileKey),
       cert: fs.readFileSync(fileCert),
     } : undefined,
-  } : {
-    // glitch.com default
-    strictPort: true,
-    hmr: {
-      port: 443 // Run the websocket server on the SSL port
-    }
   }
 }));

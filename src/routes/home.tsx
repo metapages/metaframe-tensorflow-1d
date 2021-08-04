@@ -1,8 +1,10 @@
-import { FunctionalComponent } from "preact";
-import { useContext } from "preact/hooks";
-import { MetaframeContext } from "@metapages/metaframe-hook";
+import { h, FunctionalComponent } from "preact";
+import { TensorFlowRoute } from "./tensorflow";
 
 export const Home: FunctionalComponent = () => {
-    const metaframe = useContext(MetaframeContext);
-    return <div>metaframe inputs: {metaframe ? JSON.stringify(metaframe.inputs) : "none yet"}</div>;
+  return (
+    <div>
+      <TensorFlowRoute />
+    </div>
+  );
 };
