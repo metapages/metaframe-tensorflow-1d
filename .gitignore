@@ -1,10 +1,12 @@
 # local mkcert generated certificates for https
-.certs
+/.certs
 # never commit this
-.env
+/.env
 # I'd like to commit this but probably not a good idea
-.vscode
+/.vscode
+# Used by docker hoisting system, keeps e.g. docker container bash history. See `justfile`
+/.tmp
 # compiled website
-dist
+/dist
 # dependencies
 node_modules

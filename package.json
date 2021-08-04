@@ -1,24 +1,43 @@
 {
   "name": "metaframe-template",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "files": [
+    "dist/**/*"
+  ],
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
   "private": false,
   "scripts": {
     "note": "echo 'use just. See README.md'"
   },
-  "main": "index.js",
   "dependencies": {
+    "@chakra-ui/icons": "^1.0.14",
+    "@chakra-ui/react": "^1.6.5",
+    "@emotion/react": "^11.4.0",
+    "@emotion/styled": "^11.3.0",
     "@metapages/metaframe-hook": "^0.5.1",
+    "@metapages/metaframe-ui-widgets": "^0.2.5",
     "@metapages/metapage": "^0.8.4",
-    "preact": "^10.5.13",
-    "preact-router": "^3.2.1"
+    "@tensorflow/tfjs": "^1.7.4",
+    "@tensorflow/tfjs-vis": "^1.4.0",
+    "base64-arraybuffer": "^0.2.0",
+    "framer-motion": "^4.1.17",
+    "localforage": "^1.9.0",
+    "object-hash": "^2.0.3",
+    "preact": "^10.5.14",
+    "preact-router": "^3.2.1",
+    "zustand": "^3.5.7"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.1.0",
+    "@rollup/plugin-commonjs": "^19.0.1",
     "@rollup/plugin-typescript": "^8.2.3",
     "@types/node": "^12.20.10",
-    "@types/react": "^17.0.2",
-    "@types/react-dom": "^17.0.1",
+    "@types/object-hash": "^2.1.1",
+    "@types/react": "^16.14.11",
+    "@types/react-dom": "^16.9.14",
     "@types/react-router-dom": "^5.1.7",
+    "http-server": "^0.12.3",
     "tslib": "^2.3.0",
     "typescript": "4.1.5",
     "vite": "^2.4.3"
@@ -36,13 +55,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "alias": {
-    "react": "preact/compat",
-    "react-dom": "preact/compat"
-  },
-  "staticFiles": {
-    "staticPath": "public",
-    "watcherGlob": "**"
   }
 }
