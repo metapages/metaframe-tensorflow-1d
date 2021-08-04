@@ -2,6 +2,7 @@
 
 set shell                          := ["bash", "-c"]
 ROOT                               := env_var_or_default("GITHUB_WORKSPACE", `git rev-parse --show-toplevel`)
+export CI                          := env_var_or_default("CI", "")
 export DOCKER_IMAGE_PREFIX         := "ghcr.io/metapages/metaframe-predictor-conv-1d-net"
 # Always assume our current cloud ops image is versioned to the exact same app images we deploy
 export DOCKER_TAG                  := `if [ "${GITHUB_ACTIONS}" = "true" ]; then echo "${GITHUB_SHA}"; else echo "$(git rev-parse --short=8 HEAD)"; fi`
@@ -113,21 +114,48 @@ browser-assets-build DOCS_SUB_DIR="": _npm_install
 # {{vite}} build {{args}}
 
 
+# _ensure_inside_docker _ensureGitPorcelain _npm_clean test
 # using justfile dependencies failed, the last command would not run
 # publish to npm and github pages.
-publish npmversionargs="patch": _ensure_inside_docker _ensureGitPorcelain _npm_clean test (npm_version "{{npmversionargs}}") npm_publish githubpages_publish
+publish npmversionargs="patch":  (npm_version npmversionargs) npm_publish
+
+#  githubpages_publish
 
 # https://zellwk.com/blog/publish-to-npm/
-npm_publish: npm_build
-    #!/usr/bin/env -S deno run --unstable --allow-read=dist/package.json --allow-run --allow-write=dist/.npmrc
+npm_publish_old: npm_build
+    #!/usr/bin/env -S deno run --unstable --allow-read=package.json --allow-run --allow-write=.npmrc
     import { npmPublish } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
-    npmPublish({cwd:'dist', npmToken:'{{NPM_TOKEN}}'});
+    npmPublish({cwd:'.', npmToken:'{{NPM_TOKEN}}'});
+
+# If the version does not exist, publish the packages (metaframe+metapage)
+npm_publish: _require_NPM_TOKEN
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ "$CI" != "true" ]; then
+        # This check is here to prevent publishing if there are uncommitted changes, but this check does not work in CI environments
+        # because it starts as a clean checkout and git is not installed and it is not a full checkout, just the tip
+        if [[ $(git status --short) != '' ]]; then
+            git status
+            echo -e '💥 Cannot publish with uncommitted changes'
+            exit 2
+        fi
+    fi
+    VERSION=$(cat package.json | jq -r '.version')
+    INDEX=$(npm view $(cat package.json | jq -r .name) versions --json | jq "index( \"$VERSION\" )")
+    if [ "$INDEX" != "null" ]; then
+        echo -e '🌳 Version exists, not publishing'
+        exit 0
+    fi
+    echo "PUBLISHING npm version $VERSION"
+    echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    npm publish --access public .
 
 # bumps version, commits change, git tags
 npm_version npmversionargs="patch":
-    #!/usr/bin/env -S deno run --unstable --allow-run
-    import { npmVersion } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
-    await npmVersion({npmVersionArg:'{{npmversionargs}}'});
+    echo "npm_version {{npmversionargs}}"
+# #!/usr/bin/env -S deno run --unstable --allow-run
+# import { npmVersion } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
+# await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
 # build npm package for publishing
 npm_build: _npm_clean _npm_install

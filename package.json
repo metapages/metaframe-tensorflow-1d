@@ -1,6 +1,6 @@
 {
-  "name": "metaframe-template",
-  "version": "0.1.1",
+  "name": "@metapages/metaframe-tensorflow-1d",
+  "version": "0.1.2",
   "files": [
     "dist/**/*"
   ],

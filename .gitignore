@@ -2,6 +2,8 @@
 /.certs
 # never commit this
 /.env
+# Do not commit credentials
+.npmrc
 # I'd like to commit this but probably not a good idea
 /.vscode
 # Used by docker hoisting system, keeps e.g. docker container bash history. See `justfile`

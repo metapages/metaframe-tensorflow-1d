@@ -10,6 +10,7 @@ RUN apt-get update && apt-get -y upgrade
 RUN apt-get update && apt-get install -y \
   bash \
   curl \
+  jq \
   git \
   npm \
   && rm -rf /var/lib/apt/lists/*
