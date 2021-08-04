@@ -84,15 +84,6 @@ githubpages_publish: _ensureGitPorcelain
     git commit -m "site v`cat package.json | jq -r .version`"
     git push origin master
 
-# # update branch:glitch to master, triggering a glitch update and rebuild
-# publish-glitch: build
-#     npm run clean
-#     @# delete current glitch branch, no worries, it gets rebuilt every time
-#     git branch -D glitch || exit 0
-#     git checkout -b glitch
-#     git push -u --force origin glitch
-#     git checkout master
-
 # watchexec --watch src --exts ts,html -- just browser-assets-build
 # watches and builds browser client assets  (alternative to 'just run')
 @client-watch:

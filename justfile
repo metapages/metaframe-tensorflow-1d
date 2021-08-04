@@ -112,7 +112,7 @@ test: npm_build
     cd dist && npm unlink
 
 # update "docs" branch with the (versioned and default) current build
-githubpages_publish: _ensure_inside_docker _ensureGitPorcelain
+githubpages_publish: _ensureGitPorcelain
     just browser-assets-build ./docs/v$(cat package.json | jq -r .version)
     just browser-assets-build
     git add --all docs
