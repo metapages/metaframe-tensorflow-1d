@@ -102,7 +102,7 @@ _mkcert:
 
 
 # build production brower assets
-browser-assets-build DOCS_SUB_DIR="":
+browser-assets-build DOCS_SUB_DIR="": _npm_install
     mkdir -p docs/{{DOCS_SUB_DIR}}
     find docs/{{DOCS_SUB_DIR}} -maxdepth 1 -type f -exec rm "{}" \;
     rm -rf docs/{{DOCS_SUB_DIR}}/assets
@@ -130,9 +130,14 @@ npm_version npmversionargs="patch":
     await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
 # build npm package for publishing
-npm_build: _npm_clean
+npm_build: _npm_clean _npm_install
     @#cp package.json dist/
     {{tsc}} --noEmit false
+
+_npm_install:
+    if [ ! -d "node_modules" ]; then \
+        npm i && cd test && npm i; \
+    fi
 
 _npm_clean:
     mkdir -p dist
