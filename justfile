@@ -117,7 +117,7 @@ githubpages_publish: _ensureGitPorcelain
     just browser-assets-build
     git add --all docs
     git commit -m "site v$(cat package.json | jq -r .version)"
-    git push origin master
+    git push origin main
 
 ####################################################################################
 # Ensure docker image for local and CI operations
