@@ -152,10 +152,9 @@ npm_publish: _require_NPM_TOKEN
 
 # bumps version, commits change, git tags
 npm_version npmversionargs="patch":
-    echo "npm_version {{npmversionargs}}"
-# #!/usr/bin/env -S deno run --unstable --allow-run
-# import { npmVersion } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
-# await npmVersion({npmVersionArg:'{{npmversionargs}}'});
+    #!/usr/bin/env -S deno run --unstable --allow-run
+    import { npmVersion } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
+    await npmVersion({npmVersionArg:'{{npmversionargs}}'});
 
 # build npm package for publishing
 npm_build: _npm_clean _npm_install
