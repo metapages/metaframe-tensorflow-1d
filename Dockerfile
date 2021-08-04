@@ -43,3 +43,8 @@ RUN VERSION=1.14.1 ; \
     (echo "$SHA256SUM  watchexec-${VERSION}-i686-unknown-linux-musl.tar.xz" | sha256sum -c) && \
     tar xvf watchexec-$VERSION-i686-unknown-linux-musl.tar.xz watchexec-$VERSION-i686-unknown-linux-musl/watchexec -C /usr/bin/ --strip-components=1 && \
     rm -rf watchexec-*
+
+WORKDIR /workspace
+ADD package.json ./
+ADD package-lock.json ./
+RUN npm i

@@ -10,7 +10,6 @@ export DOCKER_TAG                  := `if [ "${GITHUB_ACTIONS}" = "true" ]; then
 export APP_FQDN                    := env_var_or_default("APP_FQDN", "metaframe1.dev")
 export APP_PORT                    := env_var_or_default("APP_PORT", "443")
 CLOUDSEED_DENO                     := "https://deno.land/x/cloudseed@v0.0.18"
-NPM_PUBLISH_DIR                    := "./dist"
 NPM_TOKEN                          := env_var_or_default("NPM_TOKEN", "")
 vite                               := "VITE_APP_FQDN=" + APP_FQDN + " VITE_APP_PORT=" + APP_PORT + " NODE_OPTIONS='--max_old_space_size=16384' ./node_modules/vite/bin/vite.js"
 tsc                                := "./node_modules/typescript/bin/tsc"
@@ -36,8 +35,7 @@ _help2:
         just _docker;
     fi
 
-#
-# Build the browser client static assets
+# Build the browser client static assets and npm module
 build: _ensure_npm_modules (_tsc "--build") browser-assets-build npm_build
 
 # Run the browser dev server (optionally pointing to any remote app)
@@ -121,9 +119,9 @@ publish npmversionargs="patch": _ensure_inside_docker _ensureGitPorcelain _npm_c
 
 # https://zellwk.com/blog/publish-to-npm/
 npm_publish: npm_build
-    #!/usr/bin/env -S deno run --unstable --allow-read={{NPM_PUBLISH_DIR}}/package.json --allow-run --allow-write={{NPM_PUBLISH_DIR}}/.npmrc
+    #!/usr/bin/env -S deno run --unstable --allow-read=dist/package.json --allow-run --allow-write=dist/.npmrc
     import { npmPublish } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
-    npmPublish({cwd:'{{NPM_PUBLISH_DIR}}', npmToken:'{{NPM_TOKEN}}'});
+    npmPublish({cwd:'dist', npmToken:'{{NPM_TOKEN}}'});
 
 # bumps version, commits change, git tags
 npm_version npmversionargs="patch":
@@ -133,17 +131,17 @@ npm_version npmversionargs="patch":
 
 # build npm package for publishing
 npm_build: _npm_clean
-    @#cp package.json {{NPM_PUBLISH_DIR}}/
+    @#cp package.json dist/
     {{tsc}} --noEmit false
 
 _npm_clean:
-    mkdir -p {{NPM_PUBLISH_DIR}}
-    rm -rf {{NPM_PUBLISH_DIR}}/*
+    mkdir -p dist
+    rm -rf dist/*
 
 test: npm_build
-    cd {{NPM_PUBLISH_DIR}} && npm link
+    cd dist && npm link
     just test/test
-    cd {{NPM_PUBLISH_DIR}} && npm unlink
+    cd dist && npm unlink
 
 # update "docs" branch with the (versioned and default) current build
 githubpages_publish: _ensure_inside_docker _ensureGitPorcelain
