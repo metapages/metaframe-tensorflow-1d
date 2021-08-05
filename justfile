@@ -120,7 +120,7 @@ githubpages_publish: _ensureGitPorcelain
     #!/usr/bin/env bash
     set -euo pipefail
     # Mostly CURRENT_BRANCH should be main, but maybe you are testing on a different branch
-    CURRENT_BRANCH=$(git branch --show-current)
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     if [ -z "$(git branch --list gh-pages)" ]; then
         git checkout -b gh-pages;
     fi
