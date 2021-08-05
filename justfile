@@ -58,7 +58,9 @@ serve DOCS_SUB_DIR="": (browser-assets-build DOCS_SUB_DIR)
     @DOCS_SUB_DIR={{DOCS_SUB_DIR}} {{vite}} build
 
 # publish to npm and github pages.
-publish npmversionargs="patch":  _ensure_inside_docker _ensureGitPorcelain _npm_clean test (npm_version npmversionargs) npm_publish githubpages_publish
+publish npmversionargs="patch": _ensure_inside_docker _ensureGitPorcelain _npm_clean test (npm_version npmversionargs) npm_publish githubpages_publish
+    @# Push the tags up
+    git push
 
 # https://zellwk.com/blog/publish-to-npm/
 npm_publish_old: npm_build
