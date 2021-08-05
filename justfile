@@ -131,7 +131,7 @@ githubpages_publish: _ensureGitPorcelain
     just browser-assets-build
     git add --all docs
     git commit -m "site v$(cat package.json | jq -r .version)"
-    git push origin gh-pages
+    git push -uf origin gh-pages
     git checkout ${CURRENT_BRANCH}
 
 ####################################################################################
