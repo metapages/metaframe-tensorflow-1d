@@ -2,7 +2,6 @@ import * as fs from "fs";
 import { defineConfig } from 'vite';
 import typescript from '@rollup/plugin-typescript';
 import preactRefresh from '@prefresh/vite'
-import commonjs from '@rollup/plugin-commonjs';
 
 const APP_FQDN = process.env.APP_FQDN || "metaframe1.dev";
 const APP_PORT = process.env.APP_PORT || "443";
@@ -12,9 +11,14 @@ console.log('DOCS_SUB_DIR', DOCS_SUB_DIR);
 const fileKey = `./.certs/${APP_FQDN}-key.pem`;
 const fileCert = `./.certs/${APP_FQDN}.pem`;
 
+// Get the github pages path e.g. if served from https://<name>.github.io/<repo>/
+// then we need to pull out "<repo>"
+const packageName = JSON.parse(fs.readFileSync('./package.json', {encoding:'utf8', flag:'r'}))["name"];
+const baseWebPath = packageName.split("/")[1];
+
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
-  base: DOCS_SUB_DIR && DOCS_SUB_DIR !== "" ? `/${DOCS_SUB_DIR}/` : undefined,
+  base: DOCS_SUB_DIR && DOCS_SUB_DIR !== "" ? `/${baseWebPath}/${DOCS_SUB_DIR}/` : `/${baseWebPath}/`,
   resolve: {
     alias: {
       'react': 'preact/compat',
