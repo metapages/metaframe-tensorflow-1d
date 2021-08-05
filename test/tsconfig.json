@@ -12,8 +12,6 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "rootDir": "src",
-    // https://stackoverflow.com/questions/51634361/how-to-force-tsc-to-ignore-node-modules-folder
-    // true means it won't try to compile node_modules content (even tho already "excluded")
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
