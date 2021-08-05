@@ -1,8 +1,4 @@
-# FROM denoland/deno:alpine
 FROM denoland/deno:1.12.2
-# this special glibc alpine version is needed for deno to run
-# FROM frolvlad/alpine-glibc:alpine-3.12_glibc-2.32 as browser
-
 
 # Runs as root, get security updates
 RUN apt-get update && apt-get -y upgrade
@@ -17,13 +13,6 @@ RUN apt-get update && apt-get install -y \
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
-
-# RUN apk --no-cache --update add \
-#     bash \
-#     curl \
-#     git \
-#     npm \
-#     openssh
 
 # justfile for running commands, you will mostly interact with just https://github.com/casey/just
 RUN VERSION=0.10.0 ; \
@@ -47,3 +36,6 @@ RUN VERSION=1.14.1 ; \
     (echo "$SHA256SUM  watchexec-${VERSION}-i686-unknown-linux-musl.tar.xz" | sha256sum -c) && \
     tar xvf watchexec-$VERSION-i686-unknown-linux-musl.tar.xz watchexec-$VERSION-i686-unknown-linux-musl/watchexec -C /usr/bin/ --strip-components=1 && \
     rm -rf watchexec-*
+
+# Newer version of npm
+RUN npm i -g npm@7.20.3
