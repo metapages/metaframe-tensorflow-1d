@@ -1,18 +1,15 @@
-# Metaframe template
+# [Tensorflow](https://www.tensorflow.org/js) [metaframe](https://metapages.org/) for training models and getting predictions
 
-Fast creation and deployment of advanced metaframe websites.
+Usage documentation: [./public/README.md](./public/README.md)
 
-Fork or copy this repo.
+## Development (command ops)
 
-## Features
+    just dev
 
-- `vite` for fast building
-- `preact` for efficient, fast loading sites
-- `typescript` for type checking
-- `just` for a single method to build/test/deploy/publish
+## Publishing
 
-## Options
+    just publish
 
-Other (maintained) branches contain useful extras:
+## Testing
 
-- chakra-ui.com UI framework: branch `OPTIONAL-ui-framework/chakra-ui.com`
+    just test

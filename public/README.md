@@ -1,4 +1,17 @@
-# Tensorflow metaframe help
+# [Tensorflow](https://www.tensorflow.org/js) [metaframe](https://metapages.org/) for training models and getting predictions
+
+This is a functional **versioned** [metaframe](https://metapages.org/) website with matching npm module.
+
+Metaframe: https://metapages.github.io/metaframe-tensorflow-1d/
+Versioned metaframe e.g `0.3.0`: https://metapages.github.io/metaframe-tensorflow-1d/v0.3.0/
+npm module (matches browser version): https://www.npmjs.com/package/@metapages/metaframe-tensorflow-1d
+
+
+# Usage
+
+TODO
+
+
 
 ## Stuff
 
