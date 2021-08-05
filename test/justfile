@@ -3,10 +3,11 @@ set shell                          := ["bash", "-c"]
 @_help:
     just --list --unsorted --list-heading $'🏵  Commands:\n';
 
-_init:
-    npm i
-    npm link metaframe-predictor-conv-1d-net
-
-test: _init
+test:
+    # cd .. && npm link
+    npm i --no-save --only=production ../
+    # npm link @metapages/metaframe-tensorflow-1d
     @# Compile to test, not very good
-    ./node_modules/typescript/bin/tsc
+    ../node_modules/typescript/bin/tsc --project tsconfig.json
+    # npm unlink @metapages/metaframe-tensorflow-1d
+    # cd .. && npm unlink

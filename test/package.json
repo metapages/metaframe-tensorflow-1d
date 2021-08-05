@@ -7,8 +7,5 @@
     "test": "just test"
   },
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "typescript": "4.1.5"
-  }
+  "license": "ISC"
 }

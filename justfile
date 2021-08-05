@@ -3,14 +3,20 @@
 set shell                          := ["bash", "-c"]
 ROOT                               := env_var_or_default("GITHUB_WORKSPACE", `git rev-parse --show-toplevel`)
 export CI                          := env_var_or_default("CI", "")
-export DOCKER_IMAGE_PREFIX         := "ghcr.io/metapages/metaframe-predictor-conv-1d-net"
+PACKAGE_NAME_SHORT                 := file_name(`cat package.json | jq -r '.name'`)
+# Store the CI/dev docker image in github
+export DOCKER_IMAGE_PREFIX         := "ghcr.io/metapages/" + PACKAGE_NAME_SHORT
 # Always assume our current cloud ops image is versioned to the exact same app images we deploy
 export DOCKER_TAG                  := `if [ "${GITHUB_ACTIONS}" = "true" ]; then echo "${GITHUB_SHA}"; else echo "$(git rev-parse --short=8 HEAD)"; fi`
 # E.g. 'my.app.com'. Some services e.g. auth need know the external endpoint for example OAuth
 # The root domain for this app, serving index.html
 export APP_FQDN                    := env_var_or_default("APP_FQDN", "metaframe1.dev")
 export APP_PORT                    := env_var_or_default("APP_PORT", "443")
+# Some commands use deno because it's great at this stuff
 CLOUDSEED_DENO                     := "https://deno.land/x/cloudseed@v0.0.18"
+# cache deno modules on the host so they can be transferred to the docker container
+export DENO_DIR                    := ROOT + "/.tmp/deno"
+# The NPM_TOKEN is required for publishing to https://www.npmjs.com
 NPM_TOKEN                          := env_var_or_default("NPM_TOKEN", "")
 vite                               := "VITE_APP_FQDN=" + APP_FQDN + " VITE_APP_PORT=" + APP_PORT + " NODE_OPTIONS='--max_old_space_size=16384' ./node_modules/vite/bin/vite.js"
 tsc                                := "./node_modules/typescript/bin/tsc"
@@ -24,7 +30,7 @@ magenta                            := "\\e[35m"
 grey                               := "\\e[90m"
 
 @_help:
-    just --list --unsorted --list-heading $'🏵  Commands: Metaframe Tensorflow 1D conv net 🔗 {{green}}https://metapages.github.io/metaframe-predictor-conv-1d-net/{{normal}}\n';
+    just --list --unsorted --list-heading $'🏵  Commands: Metaframe Tensorflow 1D conv net 🔗 {{green}}https://metapages.github.io/{{PACKAGE_NAME_SHORT}}/{{normal}}\n';
 
 # Build the browser client static assets and npm module
 build: _ensure_npm_modules (_tsc "--build") browser-assets-build npm_build
@@ -45,11 +51,11 @@ serve DOCS_SUB_DIR="": (browser-assets-build DOCS_SUB_DIR)
     cd docs && ../node_modules/http-server/bin/http-server --cors '*' -o {{DOCS_SUB_DIR}} -a {{APP_FQDN}} -p {{APP_PORT}} --ssl --cert ../.certs/{{APP_FQDN}}.pem --key ../.certs/{{APP_FQDN}}-key.pem
 
 # build production brower assets
-browser-assets-build DOCS_SUB_DIR="": _npm_install
+@browser-assets-build DOCS_SUB_DIR="": _npm_install
     mkdir -p docs/{{DOCS_SUB_DIR}}
     find docs/{{DOCS_SUB_DIR}} -maxdepth 1 -type f -exec rm "{}" \;
     rm -rf docs/{{DOCS_SUB_DIR}}/assets
-    DOCS_SUB_DIR={{DOCS_SUB_DIR}} {{vite}} build
+    @DOCS_SUB_DIR={{DOCS_SUB_DIR}} {{vite}} build
 
 # publish to npm and github pages.
 publish npmversionargs="patch":  _ensure_inside_docker _ensureGitPorcelain _npm_clean test (npm_version npmversionargs) npm_publish githubpages_publish
@@ -97,27 +103,35 @@ npm_build: _npm_clean _npm_install
 clean:
     rm -rf .certs dist
 
-_npm_install:
+@_npm_install:
     if [ ! -d "node_modules" ]; then \
-        npm i && cd test && npm i; \
+        npm i --silent && cd test && npm i --silent ; \
     fi
 
-_npm_clean:
+@_npm_clean:
     mkdir -p dist
     rm -rf dist/*
 
-test: npm_build
-    cd dist && npm link
+@test: npm_build
     just test/test
-    cd dist && npm unlink
 
-# update "docs" branch with the (versioned and default) current build
+# update "gh-pages" branch with the (versioned and default) current build (and keeping all previous versions)
 githubpages_publish: _ensureGitPorcelain
-    just browser-assets-build ./docs/v$(cat package.json | jq -r .version)
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Mostly CURRENT_BRANCH should be main, but maybe you are testing on a different branch
+    CURRENT_BRANCH=$(git branch --show-current)
+    if [ -z "$(git branch --list gh-pages)" ]; then
+        git checkout -b gh-pages;
+    fi
+    git checkout gh-pages
+    git rebase ${CURRENT_BRANCH}
+    just browser-assets-build ./v$(cat package.json | jq -r .version)
     just browser-assets-build
     git add --all docs
     git commit -m "site v$(cat package.json | jq -r .version)"
-    git push origin main
+    git push origin gh-pages
+    git checkout ${CURRENT_BRANCH}
 
 ####################################################################################
 # Ensure docker image for local and CI operations
@@ -128,6 +142,13 @@ githubpages_publish: _ensureGitPorcelain
     echo -e "🚪🚪 Entering docker context: {{bold}}{{DOCKER_IMAGE_PREFIX}}cloud:{{DOCKER_TAG}} from <cloud/>Dockerfile 🚪🚪{{normal}}"
     mkdir -p {{ROOT}}/.tmp
     touch {{ROOT}}/.tmp/.bash_history
+
+    # Hack for dealing with macos+docker+volume woes
+    mkdir -p {{ROOT}}/node_modules
+    chmod 777 {{ROOT}}/node_modules
+    mkdir -p  {{ROOT}}/test/node_modules
+    chmod 777 {{ROOT}}/test/node_modules
+
     export WORKSPACE=/repo && \
         docker run \
             --rm \
