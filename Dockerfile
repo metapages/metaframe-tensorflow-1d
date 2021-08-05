@@ -47,3 +47,6 @@ RUN VERSION=1.14.1 ; \
     (echo "$SHA256SUM  watchexec-${VERSION}-i686-unknown-linux-musl.tar.xz" | sha256sum -c) && \
     tar xvf watchexec-$VERSION-i686-unknown-linux-musl.tar.xz watchexec-$VERSION-i686-unknown-linux-musl/watchexec -C /usr/bin/ --strip-components=1 && \
     rm -rf watchexec-*
+
+# Newer version of npm
+RUN npm i -g npm@7.20.3
