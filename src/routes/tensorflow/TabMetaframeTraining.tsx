@@ -4,7 +4,7 @@ import { useMetaframe, useHashParamBoolean } from "@metapages/metaframe-hook";
 import objectHash from "object-hash";
 import * as tf from "@tensorflow/tfjs";
 import { ButtonClearCache } from "../../components/ButtonClearCache";
-import { TrainingDataSet } from "../../lib/metaframe";
+import { TrainingDataPoint, TrainingDataSet } from "../../lib/metaframe";
 import { TrainingData } from "../../lib/TrainingData";
 import { Trainer } from "../../lib/Trainer";
 import { useStore, MessagePayload } from "../../store";
@@ -73,17 +73,33 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
   const setMessages = useStore((state) => state.setMessages);
   // triggered on a new trainingDataSet: train a new model
   useEffect(() => {
-    if (!trainingDataSet || !metaframeObject?.setOutputs) {
+    if (!trainingDataSet || !trainingDataSet.examples || trainingDataSet.examples.length === 0 || !metaframeObject?.setOutputs) {
+      return;
+    }
+
+    const messageHeader: MessagePayload = {
+      message: "Training",
+      type: "info",
+    };
+
+    const keys = Object.keys(trainingDataSet.examples.reduce<Record<string, boolean>>((map, current) => {
+      map[current.label] = true;
+      return map;
+    }, {}));
+
+    if (keys.length < 2) {
+      const messageNotEnoughLabels: MessagePayload = {
+        message: `Not enough data labels: [${keys.join(", ")}]`,
+        type: "warning",
+      };
+      setMessages([messageHeader, messageNotEnoughLabels]);
       return;
     }
 
     let cancelled = false;
 
     (async () => {
-      const messageHeader: MessagePayload = {
-        message: "Training",
-        type: "info",
-      };
+
       const messageLoading: MessagePayload = {
         message: "loading data...",
         type: "info",
