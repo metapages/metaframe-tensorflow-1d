@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import typescript from '@rollup/plugin-typescript';
 import preactRefresh from '@prefresh/vite'
@@ -24,6 +25,7 @@ export default defineConfig(({ command, mode }) => ({
       'react': 'preact/compat',
       'react-dom': 'preact/compat',
       "react-dom/test-utils": "preact/test-utils",
+      '/@': resolve(__dirname, './src'),
     },
   },
   esbuild: {
@@ -32,7 +34,7 @@ export default defineConfig(({ command, mode }) => ({
   },
   plugins: [
     preactRefresh(),
-    typescript({ outDir: `docs/${DOCS_SUB_DIR}`, sourceMap: true, inlineSources: mode !== 'production' }),
+    // typescript({ outDir: `docs/${DOCS_SUB_DIR}`, sourceMap: true, inlineSources: mode !== 'production' }),
     // commonjs(),
   ],
   build: {

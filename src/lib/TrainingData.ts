@@ -55,6 +55,10 @@ export class TrainingData {
     // label: {data:exampleData, url:title}
     // <GestureName, Array<SensorJson>>
     data:{ [key: string]: SensorJson[]; } = {}; // Final processed data
+
+    // for normalizing predictions
+    ranges: Record<string, {min:number, max:number, absmax:number}> = {};
+
     //
     _labels:string[] = [];
     // e.g. [ ax ay az gx gy gz ] computed from examples
@@ -71,7 +75,7 @@ export class TrainingData {
     bigFatLabelArray:Uint8Array = new Uint8Array();
 
     _timesteps:number = 0;
-    _maxAbsoluteValue:number = 0;
+    // _maxAbsoluteValue:number = 0;
 
 
   constructor(trainingJson :TrainingDataSet) {
@@ -561,6 +565,10 @@ export class TrainingData {
     });
   }
 
+  allExamplesForLabel(label :string) { // iterateFunc: (object of xyzt arrays of sensor data points, sensor <ax ay etc>, exampleIndex, label)
+    return this.data[label];
+  }
+
   /**
    * {
   "accelerometer": [
@@ -581,14 +589,45 @@ export class TrainingData {
   }
 
   // Divide by the absolute max so all values [-1,1]
+  // For each series label:
+  //   - get the min+max over all examples
+  //   - normalize each series for the specific series min+max [-1,1]
+  //   - this way you don't need to then normalize between series, which
+  //     ruins signals where some signals have a bigger baseline variance
   normalize() {
     console.log('    normalizing...');
-    let max = this.getMaxValue();
-    this._maxAbsoluteValue = max;
-    console.log(`        max=${max}`);
-    this.allNonTimeValues((val, index, arr) => {
-      arr[index] = val / max;
+
+    const nonTimeSensorStreams = this._streams.filter(s => !s.endsWith('t'));
+    // initialize the ranges map
+    nonTimeSensorStreams.forEach(stream => this.ranges[stream] = {min:Number.MAX_VALUE, max:Number.MIN_VALUE, absmax:Number.MIN_VALUE});
+    this.allNonTimeSensorStreams((sensorArray :Float32Array, sensorname:string, exampleIndex:number, gestureName:string) => {
+        sensorArray.forEach((sensorDataPoint :number) => {
+          this.ranges[sensorname].min = Math.min(this.ranges[sensorname].min, sensorDataPoint);
+          this.ranges[sensorname].max = Math.max(this.ranges[sensorname].max, sensorDataPoint);
+
+        });
     });
+
+    // We use the absolute max for normalizing
+    nonTimeSensorStreams.forEach(stream => this.ranges[stream].absmax = Math.max(this.ranges[stream].max, Math.abs(this.ranges[stream].min)));
+
+    this.allNonTimeSensorStreams((sensorArray :Float32Array, sensorname:string, exampleIndex:number, gestureName:string) => {
+      const sensorMax = this.ranges[sensorname].absmax;
+      sensorArray.forEach((_ :number, index:number) => {
+        sensorArray[index] = sensorArray[index] / sensorMax;
+      });
+  });
+
+
+    // let max = this.getMaxValue();
+    // this._maxAbsoluteValue = max;
+    console.log(`        this.ranges=${JSON.stringify(this.ranges)}`);
+
+
+
+    // this.allNonTimeValues((val, index, arr) => {
+    //   arr[index] = val / max;
+    // });
   }
 
   // Time starts at zero (absolute time is recorded)
@@ -598,10 +637,10 @@ export class TrainingData {
     this.allExamples((example) => {
         const timeStreams = this._streams.filter(s => s.endsWith('t'));
 
-        // get the earliest time
+        // get the earliest time and make that zero and adjust
         let minTime :number = Number.MAX_VALUE;
         timeStreams.forEach(timestream => {
-          example[timestream].forEach((sensorDataPoint:number) => minTime = Math.min(minTime, sensorDataPoint));
+          example[timestream].forEach((sensorDataPoint:number, i) => minTime = Math.min(minTime, sensorDataPoint));
         });
 
         // make that zero and adjust
@@ -638,7 +677,7 @@ export class TrainingData {
     const streamsWithoutTime = this._streams.filter(s => !s.endsWith('t'));
     this.allExamples((example, _, gesture) => {
       // control examples don't count
-      if (gesture != '_') {
+      if (!this.trainingDataJson.controlLabels || !this.trainingDataJson.controlLabels.includes(gesture)) {
         // just grab the length of the first stream, assume all the same length
         let lastNonZero = example[this._streams[0]].length - 1;
         for ( ; lastNonZero >= 0;lastNonZero--) {
@@ -731,6 +770,8 @@ export class TrainingData {
     if (this._timesteps === 0) {
       throw 'processPrediction but this._timesteps === 0';
     }
+
+
     // this.processExample(example);
 
     // trim/extend so same timeSteps
@@ -748,8 +789,9 @@ export class TrainingData {
 
     // normalize over max over all training examples
     Object.keys(example).forEach((stream :string) => {
+      const sensorMax = this.ranges[stream].absmax;
       example[stream].forEach((val :number, index:number, arr) => {
-        arr[index] = val / this._maxAbsoluteValue;
+        arr[index] = val / sensorMax;
       });
     });
 

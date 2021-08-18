@@ -125,11 +125,12 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
           classNames: trainingData.classNames,
           imageHeight: trainingData.imageHeight,
           imageWidth: trainingData.imageWidth,
-          maxAbsoluteRawValue: trainingData._maxAbsoluteValue,
+          // maxAbsoluteRawValue: trainingData._maxAbsoluteValue,
         },
         training: {
           date: new Date(),
-          trainingDataHash: hash,
+          hash,
+          ranges: trainingData.ranges,
         },
       };
 

@@ -1,12 +1,9 @@
 import create from "zustand";
 import * as tf from "@tensorflow/tfjs";
 import {
-
   AlertStatus,
 } from "@chakra-ui/react";
-import {
-  PredictionResult,
-} from "./lib/metaframe";
+import { PredictionResult, TrainingDataSet, PredictionInputEncoded } from './lib/metaframe';
 import { PersistedModel } from "./lib/types";
 
 export type MessagePayload = {
@@ -20,30 +17,35 @@ export type StoreState = {
   messages: MessagePayload[];
   modelCount: number;
   model: PersistedModel | undefined;
-  prediction: PredictionResult | undefined;
+  trainingDataSet: TrainingDataSet | undefined;
+  predictionInput: PredictionInputEncoded | undefined;
+  predictionOutput: PredictionResult | undefined;
   currentlyTrainingDataHash: string | null;
   clearMessages: () => void;
   addMessage: (message: MessagePayload) => void;
   setMessages: (messages: MessagePayload[]) => void;
-  setTrainingDataHash: (hash: string | null) => void;
+  setTrainingDataSet: (training: TrainingDataSet) => void;
   updateModels: () => Promise<void>;
   deleteModels: () => void;
   setModel: (model: PersistedModel) => void;
-  setPrediction: (prediction: PredictionResult | undefined) => void;
+  setPredictionInput: (prediction: PredictionInputEncoded) => void;
+  setPredictionOutput: (prediction: PredictionResult) => void;
 };
 
 export const useStore = create<StoreState>(set => ({
   messages: [],
   modelCount: -1,
   model: undefined,
-  prediction: undefined,
+  trainingDataSet: undefined,
+  predictionInput: undefined,
+  predictionOutput: undefined,
   currentlyTrainingDataHash: null,
   clearMessages: () => set((state) => ({ messages: [] })),
   addMessage: (message: MessagePayload) =>
     set((state) => ({ messages: state.messages.concat([message]) })),
   setMessages: (messages: MessagePayload[]) => set((state) => ({ messages })),
-  setTrainingDataHash: (hash: string | null) =>
-    set((state) => ({ currentlyTrainingDataHash: hash })),
+  setTrainingDataSet: (trainingDataSet: TrainingDataSet) =>
+    set((state) => ({ trainingDataSet })),
 
   updateModels: async () => {
     const count = await getModelCount();
@@ -56,8 +58,11 @@ export const useStore = create<StoreState>(set => ({
   setModel: async (model: PersistedModel) => {
     set((state) => ({ model }));
   },
-  setPrediction: async (prediction: PredictionResult | undefined) => {
-    set((state) => ({ prediction }));
+  setPredictionInput: async (predictionInput: PredictionInputEncoded) => {
+    set((state) => ({ predictionInput }));
+  },
+  setPredictionOutput: async (predictionOutput: PredictionResult) => {
+    set((state) => ({ predictionOutput }));
   },
 }));
 

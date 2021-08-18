@@ -127,7 +127,7 @@ export const predict = async (
     prediction: labelWithHighestScore,
     predictions: predictionMap,
     requestId: input.requestId,
-    modelHash: model.meta.training.trainingDataHash,
+    modelHash: model.meta.training.hash,
     note,
   };
 
@@ -186,7 +186,7 @@ export const processPrediction = (
   keys.forEach((stream: string) => {
     example[stream].forEach(
       (val: number, index: number, arr: Float32Array | Int32Array) => {
-        arr[index] = val / model!.meta.prediction.maxAbsoluteRawValue;
+        arr[index] = val / model!.meta.training.ranges[stream].absmax;
       }
     );
   });

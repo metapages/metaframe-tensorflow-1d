@@ -97,6 +97,8 @@ export interface TrainingDataSet {
   // stored with the model, for bookkeeping
   modelId?: string;
   examples: Array<TrainingDataPoint>;
+  /* examples for "no real gesture" */
+  controlLabels?:string[];
   hash:string; // computed using object-hash
 }
 
@@ -104,12 +106,16 @@ export interface PredictionMetadata {
   classNames: string[];
   imageHeight: number;
   imageWidth: number;
-  maxAbsoluteRawValue: number;
+
+  // maxAbsoluteRawValue: number;
 }
 
 export interface TrainingMetadata {
   date: Date;
-  trainingDataHash: string;
+  hash: string;
+  // Derived from training data, use for normalizing predictions
+  // keys are series labels, e.g. ax, gy etc (**not** example labels)
+  ranges: Record<string, {min:number, max:number, absmax:number}>;
 }
 
 

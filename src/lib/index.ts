@@ -13,7 +13,6 @@ export {
     base64decode,
 } from "./base64";
 
-
 export {
     PredictionInput,
     PredictionInputEncoded,
