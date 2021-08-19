@@ -33,6 +33,10 @@ export const TabMetaframePrediction: FunctionalComponent = () => {
     undefined
   );
 
+  useEffect(() => {
+    console.log('metaframeObject.inputs', metaframeObject.inputs);
+  }, [metaframeObject.inputs])
+
   // console.log(
   //   `TabMetaframePrediction\n model=${
   //     model !== undefined

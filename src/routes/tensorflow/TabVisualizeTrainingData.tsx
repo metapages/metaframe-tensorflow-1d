@@ -29,6 +29,9 @@ export const TabVisualizeTrainingData: FunctionalComponent = () => {
 
   // load
   useEffect(() => {
+    if (!trainingDataSet) {
+      return;
+    }
     let cancelled = false;
     (async () => {
       const trainingDataNew = new TrainingData(trainingDataSet);

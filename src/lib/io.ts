@@ -162,6 +162,8 @@ export const processPrediction = (
   const keys = Object.keys(example);
   keys.sort();
 
+  console.log('keys', keys);
+
   // TODO this is a hack, won't always work, but I can't remember right now
   const timesteps = Math.max(
     model.meta.prediction.imageHeight,

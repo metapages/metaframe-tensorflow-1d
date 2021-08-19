@@ -7,11 +7,10 @@ import { useStore, MessagePayload } from "./store";
 
 export const App: FunctionalComponent = () => {
 
+  // Wire up the metaframe to the store
   const metaframeObject = useMetaframe();
   const setTrainingDataSet = useStore((state) => state.setTrainingDataSet);
   const setPredictionInput = useStore((state) => state.setPredictionInput);
-
-  // Wire up the metaframe to the store
   useEffect(() => {
     if (!metaframeObject.metaframe) {
       return;
@@ -33,5 +32,6 @@ export const App: FunctionalComponent = () => {
       while(disposers.length > 0) disposers.pop()();
     }
   }, [metaframeObject.metaframe, setTrainingDataSet]);
+  
   return <Home />;
 };

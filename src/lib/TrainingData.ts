@@ -44,7 +44,7 @@ const proportionTrainingSamples = 0.7;
 
 // const count = (a, b) => a + b;
 
-type SensorJson = {data:SensorSeries, url:string};
+export type SensorJson = {data:SensorSeries, url:string};
 
 /**
  * async load() is where the important data filtering happens
@@ -604,7 +604,6 @@ export class TrainingData {
         sensorArray.forEach((sensorDataPoint :number) => {
           this.ranges[sensorname].min = Math.min(this.ranges[sensorname].min, sensorDataPoint);
           this.ranges[sensorname].max = Math.max(this.ranges[sensorname].max, sensorDataPoint);
-
         });
     });
 
@@ -816,6 +815,7 @@ export class TrainingData {
     const data = this.data;
     this._streams = [];
     const axesSet :{[key:string]:boolean}= {};
+    console.log(this?.trainingDataJson?.examples[0])
     this.trainingDataJson.examples.forEach((example :TrainingDataPoint) => {
         const label = example.label;
         if (!data[label]) {
