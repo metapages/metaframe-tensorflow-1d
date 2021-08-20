@@ -1,6 +1,11 @@
 {
   "name": "@metapages/metaframe-tensorflow-1d",
   "public": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/metapages/metaframe-tensorflow-1d"
+  },
+  "homepage": "https://github.com/metapages/metaframe-tensorflow-1d/tree/main/docs#readme",
   "version": "0.3.10",
   "files": [
     "dist/**/*"
