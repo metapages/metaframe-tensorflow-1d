@@ -62,13 +62,7 @@ publish npmversionargs="patch": _ensure_inside_docker _ensureGitPorcelain _npm_c
     @# Push the tags up
     git push
 
-# https://zellwk.com/blog/publish-to-npm/
-npm_publish_old: npm_build
-    #!/usr/bin/env -S deno run --unstable --allow-read=package.json --allow-run --allow-write=.npmrc
-    import { npmPublish } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
-    npmPublish({cwd:'.', npmToken:'{{NPM_TOKEN}}'});
-
-# If the version does not exist, publish the packages (metaframe+metapage)
+# If the npm version does not exist, publish the module
 npm_publish: _require_NPM_TOKEN
     #!/usr/bin/env bash
     set -euo pipefail
@@ -165,7 +159,6 @@ githubpages_publish: _ensureGitPorcelain
             -v {{ROOT}}:$WORKSPACE \
             -v $HOME/.gitconfig:/root/.gitconfig \
             -v $HOME/.ssh:/root/.ssh \
-            -v /var/run/docker.sock:/var/run/docker.sock \
             -w $WORKSPACE \
             {{DOCKER_IMAGE_PREFIX}}cloud:{{DOCKER_TAG}} bash || true
 
