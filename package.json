@@ -1,7 +1,7 @@
 {
   "name": "@metapages/metaframe-tensorflow-1d",
   "public": true,
-  "version": "0.3.9",
+  "version": "0.3.10",
   "files": [
     "dist/**/*"
   ],
