@@ -95,6 +95,10 @@ npm_version npmversionargs="patch":
 npm_build: _npm_clean _npm_install
     {{tsc}} --noEmit false
 
+# delete and reinstall node modules, useful when switching between docker and host
+npm_reset:
+    rm -rf node_modules && npm i
+
 # deletes .certs dist
 clean:
     rm -rf .certs dist

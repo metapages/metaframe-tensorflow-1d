@@ -668,6 +668,10 @@ export class TrainingData {
     });
   }
 
+  // removeEmptyExamples() {
+  //   trimToLongestNonZeroGesture()
+  // }
+
   // Time starts at zero (absolute time is recorded)
   trimToLongestNonZeroGesture() {
     console.log('    getting longest non-default gesture...');
@@ -678,6 +682,11 @@ export class TrainingData {
       // control examples don't count
       if (!this.trainingDataJson.controlLabels || !this.trainingDataJson.controlLabels.includes(gesture)) {
         // just grab the length of the first stream, assume all the same length
+        // console.log('example', example);
+        // sometimes I get an empty object, what's up with that?
+        if (!example[this._streams[0]]) {
+          return;
+        }
         let lastNonZero = example[this._streams[0]].length - 1;
         for ( ; lastNonZero >= 0;lastNonZero--) {
             // if any stream (ignoring time) contain a non-zero value, this is the end of the actual stream
@@ -692,6 +701,9 @@ export class TrainingData {
     console.log(`        [max=${max}] [maxAll=${maxAll}]...trimming...`);
     this.allExamples((example, _, gesture) => {
         this._streams.forEach((stream) => {
+            if (!example[stream]) {
+              return;
+            }
             example[stream] = example[stream].slice(0, max);
         })
     });
@@ -829,7 +841,9 @@ export class TrainingData {
 
     this._streams = Object.keys(axesSet);
     this._streams.sort();
+    console.log('this._streams', this._streams);
     this._labels = Object.keys(this.data);
+    console.log('this._labels', this._labels);
     this._labels.sort();
     console.log(`labels: [  ${this._labels.join('  |  ')}  ]`);
     console.log('    done loading raw gesture data, begin preprocessing...');
