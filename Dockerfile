@@ -39,3 +39,5 @@ RUN VERSION=1.14.1 ; \
 
 # Newer version of npm
 RUN npm i -g npm@7.20.3
+
+# ENTRYPOINT [ "/bin/bash" ]

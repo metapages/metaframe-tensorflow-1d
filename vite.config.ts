@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
-import typescript from '@rollup/plugin-typescript';
 import preactRefresh from '@prefresh/vite'
 
 const APP_FQDN = process.env.APP_FQDN || "metaframe1.dev";
@@ -11,6 +10,8 @@ console.log('DOCS_SUB_DIR', DOCS_SUB_DIR);
 
 const fileKey = `./.certs/${APP_FQDN}-key.pem`;
 const fileCert = `./.certs/${APP_FQDN}.pem`;
+
+const INSIDE_CONTAINER = fs.existsSync('/.dockerenv');
 
 // Get the github pages path e.g. if served from https://<name>.github.io/<repo>/
 // then we need to pull out "<repo>"
@@ -45,8 +46,8 @@ export default defineConfig(({ command, mode }) => ({
     emptyOutDir: false,
   },
   server: {
-    open: '/',
-    host: APP_FQDN,
+    open: INSIDE_CONTAINER ? undefined : '/',
+    host: INSIDE_CONTAINER ? "0.0.0.0" : APP_FQDN,
     port: parseInt(fs.existsSync(fileKey) ? APP_PORT : "8000"),
     https: fs.existsSync(fileKey) && fs.existsSync(fileCert) ? {
       key: fs.readFileSync(fileKey),

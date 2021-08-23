@@ -35,8 +35,12 @@ grey                               := "\\e[90m"
 # Build the browser client static assets and npm module
 build: _ensure_npm_modules (_tsc "--build") browser-assets-build npm_build
 
+#
 # Run the browser dev server (optionally pointing to any remote app)
-dev: _ensure_npm_modules _mkcert (_tsc "--build")
+@dev: _mkcert
+    just docker just _dev
+
+_dev: _ensure_npm_modules (_tsc "--build")
     #!/usr/bin/env bash
     APP_ORIGIN=https://${APP_FQDN}:${APP_PORT}
     echo "Browser development pointing to: ${APP_ORIGIN}"
@@ -139,7 +143,7 @@ githubpages_publish: _ensureGitPorcelain
 # Hoist into a docker container with all require CLI tools installed
 ####################################################################################
 # Hoist into a docker container with all require CLI tools installed
-@docker: _build_docker
+@docker +args="bash": _build_docker
     echo -e "🚪🚪 Entering docker context: {{bold}}{{DOCKER_IMAGE_PREFIX}}cloud:{{DOCKER_TAG}} from <cloud/>Dockerfile 🚪🚪{{normal}}"
     mkdir -p {{ROOT}}/.tmp
     touch {{ROOT}}/.tmp/.bash_history
@@ -163,8 +167,9 @@ githubpages_publish: _ensureGitPorcelain
             -v {{ROOT}}:$WORKSPACE \
             -v $HOME/.gitconfig:/root/.gitconfig \
             -v $HOME/.ssh:/root/.ssh \
+            -p {{APP_PORT}}:{{APP_PORT}} \
             -w $WORKSPACE \
-            {{DOCKER_IMAGE_PREFIX}}cloud:{{DOCKER_TAG}} bash || true
+            {{DOCKER_IMAGE_PREFIX}}cloud:{{DOCKER_TAG}} {{args}} || true
 
 # If the ./app docker image in not build, then build it
 @_build_docker:
