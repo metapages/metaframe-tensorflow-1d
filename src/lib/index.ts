@@ -28,3 +28,9 @@ export {
     predictionEncode,
     predictionDecode,
 } from "./metaframe";
+
+export {
+    PersistedModel,
+    PersistedModelJson,
+    PersistedModelMetadata,
+} from "./types";
