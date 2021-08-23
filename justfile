@@ -133,7 +133,7 @@ githubpages_publish: _ensureGitPorcelain
     git rebase -Xours ${CURRENT_BRANCH}
     just browser-assets-build ./v$(cat package.json | jq -r .version)
     just browser-assets-build
-    git add --all docs
+    git add --all --force docs
     git commit -m "site v$(cat package.json | jq -r .version)"
     git push -uf origin gh-pages
     git checkout ${CURRENT_BRANCH}
