@@ -534,6 +534,9 @@ export class TrainingData {
       examples.forEach((exampleBlob, exampleIndex) => {
         const example = exampleBlob.data;
         this._streams.forEach((sensorName :string) => {
+          if (!example[sensorName]) {
+            console.error(`sensorName=${sensorName} gestureName=${gestureName}`)
+          }
           iterateFunc(example[sensorName], sensorName, exampleIndex, gestureName);
         });
       });
