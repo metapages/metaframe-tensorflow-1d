@@ -20,7 +20,7 @@ import { TabMetaframeTraining } from "./TabMetaframeTraining";
 import { TabMetaframePrediction } from "./TabMetaframePrediction";
 import { useHashParamInt } from "@metapages/metaframe-hook";
 import { Messages } from "../../components/Messages";
-import { TabVisualizeTrainingData } from './TabVisualizeTrainingData';
+import { TabVisualizeTrainingData } from "./TabVisualizeTrainingData";
 
 export const TensorFlowRoute: FunctionalComponent = () => {
   const colors = useColorModeValue(
@@ -49,19 +49,19 @@ export const TensorFlowRoute: FunctionalComponent = () => {
       <Box>
         <Tabs isLazy={true} isFitted={true} onChange={setIndex} bg={bg}>
           <TabList>
-            <Tab>Visualize training</Tab>
             <Tab>Train</Tab>
             <Tab>Predict</Tab>
+            <Tab>View training data</Tab>
           </TabList>
           <TabPanels p="1rem">
-            <TabPanel>
-              <TabVisualizeTrainingData />
-            </TabPanel>
             <TabPanel>
               <TabMetaframeTraining />
             </TabPanel>
             <TabPanel>
               <TabMetaframePrediction />
+            </TabPanel>
+            <TabPanel>
+              <TabVisualizeTrainingData />
             </TabPanel>
           </TabPanels>
         </Tabs>

@@ -47,6 +47,18 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
     })();
   }, [setTrainingDataSet]);
 
+  // always send the model to the metaframe outputs
+  useEffect(() => {
+    if (!model) {
+      return;
+    }
+    (async () => {
+      const persistedModelJson = await modelToJson(model);
+      console.log('🌞 SENT MODEL TO metaframe.outputs["model"]')
+      metaframeObject.setOutputs!({ model: persistedModelJson });
+    })();
+  }, [model, metaframeObject.setOutputs]);
+
   // update the trainingDataSet if a new (hashed to check) arrives
   useEffect(() => {
     const incomingTrainingData = metaframeObject?.inputs["training"];
@@ -125,7 +137,6 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
           classNames: trainingData.classNames,
           imageHeight: trainingData.imageHeight,
           imageWidth: trainingData.imageWidth,
-          // maxAbsoluteRawValue: trainingData._maxAbsoluteValue,
         },
         training: {
           date: new Date(),
@@ -181,8 +192,6 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
       }
 
       setModel(model);
-      const persistedModelJson = await modelToJson(model);
-      metaframeObject.setOutputs!({ model: persistedModelJson });
 
       setMessages([
         messageHeader,

@@ -844,11 +844,10 @@ export class TrainingData {
 
     this._streams = Object.keys(axesSet);
     this._streams.sort();
-    console.log('this._streams', this._streams);
     this._labels = Object.keys(this.data);
-    console.log('this._labels', this._labels);
     this._labels.sort();
     console.log(`labels: [  ${this._labels.join('  |  ')}  ]`);
+    console.log(`streams: [  ${this._streams.join('  |  ')}  ]`);
     console.log('    done loading raw gesture data, begin preprocessing...');
     this.trimToLongestNonZeroGesture();
     this.normalize();
