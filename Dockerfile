@@ -1,4 +1,4 @@
-FROM denoland/deno:1.12.2
+FROM denoland/deno:debian-1.13.2
 
 # Runs as root, get security updates
 RUN apt-get update && apt-get -y upgrade
