@@ -1,4 +1,4 @@
-import { h, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useStore } from "../../store";
 import { TrainingData } from "../../lib/TrainingData";

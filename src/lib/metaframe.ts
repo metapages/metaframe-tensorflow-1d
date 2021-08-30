@@ -197,30 +197,6 @@ export interface IMUSensorExample {
 }
 
 
-// export interface PredictionInput {
-//     data: {[key:string] : string | Float32Array | Int32Array};
-//     requestId: string | number;
-//   }
-
-
-// the sensor gesture needs to be compacted
-// export const convertIMUSensorGestureToIMUSensorExample :(gesture:IMUPointCombinedExample) => IMUSensorExample = gesture => {
-
-//   return {
-//       ax: new Float32Array(gesture.accelerometer.map(getX)),
-//       ay: new Float32Array(gesture.accelerometer.map(getY)),
-//       az: new Float32Array(gesture.accelerometer.map(getZ)),
-//       at: new Float32Array(gesture.accelerometer.map(getT)),
-//       gx: new Float32Array(gesture.gyroscope.map(getX)),
-//       gy: new Float32Array(gesture.gyroscope.map(getY)),
-//       gz: new Float32Array(gesture.gyroscope.map(getZ)),
-//       gt: new Float32Array(gesture.gyroscope.map(getT)),
-//   }
-// }
-
-
-
-
 // the sensor gesture needs to be compacted
 export const convertIMUSensorExampleToJson :(example:IMUSensorExample) => IMUSensorJson = example => {
   return {

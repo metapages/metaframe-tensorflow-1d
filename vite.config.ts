@@ -1,57 +1,64 @@
-import * as fs from "fs";
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
-import preactRefresh from '@prefresh/vite'
+// Reference: https://miyauchi.dev/posts/vite-preact-typescript/
 
-const APP_FQDN = process.env.APP_FQDN || "metaframe1.dev";
-const APP_PORT = process.env.APP_PORT || "443";
-const DOCS_SUB_DIR = process.env.DOCS_SUB_DIR;
-console.log('DOCS_SUB_DIR', DOCS_SUB_DIR);
+import fs from "fs";
+import { resolve } from "path";
+import { defineConfig } from "vite";
+import preactPlugin from "@preact/preset-vite";
 
-const fileKey = `./.certs/${APP_FQDN}-key.pem`;
-const fileCert = `./.certs/${APP_FQDN}.pem`;
-
-const INSIDE_CONTAINER = fs.existsSync('/.dockerenv');
+const APP_FQDN: string = process.env.APP_FQDN || "metaframe1.dev";
+const APP_PORT: string = process.env.APP_PORT || "443";
+const INSIDE_CONTAINER: boolean = fs.existsSync("/.dockerenv");
+const BUILD_SUB_DIR: string = process.env.BUILD_SUB_DIR || "";
+const fileKey: string = `./.certs/${APP_FQDN}-key.pem`;
+const fileCert: string = `./.certs/${APP_FQDN}.pem`;
 
 // Get the github pages path e.g. if served from https://<name>.github.io/<repo>/
 // then we need to pull out "<repo>"
-const packageName = JSON.parse(fs.readFileSync('./package.json', {encoding:'utf8', flag:'r'}))["name"];
+const packageName = JSON.parse(
+  fs.readFileSync("./package.json", { encoding: "utf8", flag: "r" })
+)["name"];
 const baseWebPath = packageName.split("/")[1];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
-  base: DOCS_SUB_DIR && DOCS_SUB_DIR !== "" ? `/${baseWebPath}/${DOCS_SUB_DIR}/` : `/${baseWebPath}/`,
+  // For serving NOT at the base path e.g. with github pages: https://<user_or_org>.github.io/<repo>/
+  base:
+    BUILD_SUB_DIR !== ""
+      ? `/${baseWebPath}/${BUILD_SUB_DIR}/`
+      : `/${baseWebPath}/`,
   resolve: {
     alias: {
-      'react': 'preact/compat',
-      'react-dom': 'preact/compat',
+      react: "preact/compat",
+      "react-dom": "preact/compat",
       "react-dom/test-utils": "preact/test-utils",
-      '/@': resolve(__dirname, './src'),
+      "/@": resolve(__dirname, "./src"),
     },
   },
-  esbuild: {
-    jsxFactory: 'h',
-    jsxFragment: 'Fragment',
+  jsx: {
+    factory: "h",
+    fragment: "Fragment",
   },
-  plugins: [
-    preactRefresh(),
-    // typescript({ outDir: `docs/${DOCS_SUB_DIR}`, sourceMap: true, inlineSources: mode !== 'production' }),
-    // commonjs(),
-  ],
+  // This is weird and should NOT be needed, but for some reason, is.
+  // The default import should already be part of that import.
+  // IT'S SO WEIRD WHY IS THIS NEEDED
+  plugins: [(preactPlugin as any).default()],
   build: {
-    outDir: `docs/${DOCS_SUB_DIR}`, //mode === "production" ? "dist" : "build",
-    target: 'esnext',
+    outDir: `docs/${BUILD_SUB_DIR}`,
+    target: "esnext",
     sourcemap: true,
-    minify: mode === 'development' ? false : 'esbuild',
+    minify: mode === "development" ? false : "esbuild",
     emptyOutDir: false,
   },
   server: {
-    open: INSIDE_CONTAINER ? undefined : '/',
+    open: INSIDE_CONTAINER ? undefined : "/",
     host: INSIDE_CONTAINER ? "0.0.0.0" : APP_FQDN,
     port: parseInt(fs.existsSync(fileKey) ? APP_PORT : "8000"),
-    https: fs.existsSync(fileKey) && fs.existsSync(fileCert) ? {
-      key: fs.readFileSync(fileKey),
-      cert: fs.readFileSync(fileCert),
-    } : undefined,
-  }
+    https:
+      fs.existsSync(fileKey) && fs.existsSync(fileCert)
+        ? {
+            key: fs.readFileSync(fileKey),
+            cert: fs.readFileSync(fileCert),
+          }
+        : undefined,
+  },
 }));

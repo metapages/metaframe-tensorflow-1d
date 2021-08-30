@@ -1,7 +1,7 @@
-import { h, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { AlignedData, Options } from "uplot";
 import "uplot/dist/uPlot.min.css";
-import UplotReact from "uplot-react";
+// import UplotReact from "uplot-react";
 import { SensorJson } from "../../lib/TrainingData";
 
 export const DataExamplePlot: FunctionalComponent<{ example: SensorJson }> = ({
@@ -63,7 +63,7 @@ export const DataExamplePlot: FunctionalComponent<{ example: SensorJson }> = ({
 
   return (
     <div>
-      <UplotReact options={options} data={data} />
+      {/* <UplotReact options={options} data={data} /> */}
     </div>
   );
 };

@@ -1,18 +1,16 @@
-FROM denoland/deno:debian-1.13.2
+FROM denoland/deno:alpine-1.13.1
 
-# Runs as root, get security updates
-RUN apt-get update && apt-get -y upgrade
+RUN apk --no-cache --update add \
+    bash \
+    curl \
+    git \
+    jq \
+    npm \
+    openssh
 
-RUN apt-get update && apt-get install -y \
-  bash \
-  curl \
-  jq \
-  git \
-  software-properties-common \
-  && rm -rf /var/lib/apt/lists/*
-
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
+# Needs edge repo
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+    sd
 
 # justfile for running commands, you will mostly interact with just https://github.com/casey/just
 RUN VERSION=0.10.0 ; \
@@ -25,7 +23,7 @@ RUN VERSION=0.10.0 ; \
 # just tweak: unify the just binary location on host and container platforms because otherwise the shebang doesn't work properly due to no string token parsing (it gets one giant string)
 ENV PATH $PATH:/usr/local/bin
 # alias "j" to just, it's just right there index finger
-RUN echo '#!/bin/bash\njust "$@"' > /usr/bin/j && \
+RUN printf '#!/bin/bash\njust "$@"' > /usr/bin/j && \
     chmod +x /usr/bin/j
 ENV JUST_SUPPRESS_DOTENV_LOAD_WARNING=1
 
@@ -38,6 +36,11 @@ RUN VERSION=1.14.1 ; \
     rm -rf watchexec-*
 
 # Newer version of npm
-RUN npm i -g npm@7.20.3
+RUN npm i -g npm@7.21.1
 
-# ENTRYPOINT [ "/bin/bash" ]
+# /repo is also hard-coded in the justfile
+WORKDIR /repo
+# Install cached modules
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm i

@@ -1,4 +1,4 @@
-import { h, Fragment, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { useCallback, useState } from "preact/hooks";
 import {
   Drawer,
@@ -28,20 +28,26 @@ export const ButtonHelp: FunctionalComponent<{ url?: string }> = ({ url }) => {
     ? url
     : `${window.location.origin}${window.location.pathname}README.md`;
 
-  return (
-    <Fragment>
-      <IconButton
-        verticalAlign="top"
-        aria-label="Help"
-        // @ts-ignore
-        icon={<QuestionIcon />}
-        size="lg"
-        onClick={onClick}
-        mr="4"
-      />
-      <HelpPanel url={url} isOpen={open} setOpen={setOpen} />
-    </Fragment>
-  );
+    return (
+      <div>
+        some text
+      </div>
+    );
+
+  // return (
+  //   <>
+  //     <IconButton
+  //       verticalAlign="top"
+  //       aria-label="Help"
+  //       // @ts-ignore
+  //       icon={<QuestionIcon />}
+  //       size="lg"
+  //       onClick={onClick}
+  //       mr="4"
+  //     />
+  //     <HelpPanel url={url} isOpen={open} setOpen={setOpen} />
+  //   </>
+  // );
 };
 
 const HelpPanel: FunctionalComponent<{
