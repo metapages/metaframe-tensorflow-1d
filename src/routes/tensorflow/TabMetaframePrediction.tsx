@@ -1,4 +1,4 @@
-import { h, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useMetaframe } from "@metapages/metaframe-hook";
 import {
@@ -70,18 +70,17 @@ export const TabMetaframePrediction: FunctionalComponent = () => {
       return;
     }
 
-    (async () => {
-      const [predictionResult, predictionError] = await predict(
-        model,
-        predictionInput
-      );
+    const [predictionResult, predictionError] = predict(
+      model,
+      predictionInput
+    );
 
-      metaframeObject.setOutputs!({
-        prediction: predictionResult,
-        error: predictionError?.message,
-      });
-      setPrediction(predictionResult);
-    })();
+    metaframeObject.setOutputs!({
+      prediction: predictionResult,
+      error: predictionError?.message,
+    });
+    setPrediction(predictionResult);
+
   }, [predictionInput, model, setPrediction, metaframeObject.setOutputs]); //, metaframeObject.setOutputs
 
   return (

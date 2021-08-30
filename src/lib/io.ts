@@ -16,18 +16,24 @@ import {base64encode, base64decode, SensorSeries, PredictionInput, PredictionRes
 
 
 export const jsonToModel = async (m : PersistedModelJson): Promise<PersistedModel> => {
+  if (m.type !== "PersistedModelJson.v1") {
+    throw `modelToJson expecting PersistedModelJson.v1 but got ${m.type}`;
+  }
   const handlerLoader = new JsonIOHandler(m.model);
   const loadedModel = await tf.loadLayersModel(handlerLoader);
-  const persistedModel: PersistedModel = Object.assign({}, m);
+  const persistedModel: PersistedModel = Object.assign({}, m, {type:"PersistedModel.v1"});
   persistedModel.model = loadedModel;
   return persistedModel;
 };
 
 export const modelToJson = async (m : PersistedModel): Promise<PersistedModelJson> => {
+  if (m.type !== "PersistedModel.v1") {
+    throw `modelToJson expecting PersistedModel.v1 but got ${m.type}`;
+  }
   const handlerSaver = new JsonIOHandler();
   const saveResult = await m.model.save(handlerSaver);
   // console.log("saveResult", saveResult);
-  const persistedModelJson: PersistedModelJson = Object.assign({}, m);
+  const persistedModelJson: PersistedModelJson = Object.assign({}, m, {type:"PersistedModelJson.v1"});
   persistedModelJson.model = handlerSaver.modelJson;
   return persistedModelJson;
 };
@@ -54,13 +60,17 @@ class JsonIOHandler implements tf.io.IOHandler {
       this.modelJson.weightData = base64encode(modelArtifact.weightData as ArrayBuffer);
       return saveResult;
     } catch (err) {
+      console.error(err);
       saveResult.errors = [`{err}`];
       return saveResult;
     }
   }
   async load(): Promise < tf.io.ModelArtifacts > {
-    console.log("JsonIOHandler.loading");
+    console.log("!!JsonIOHandler.loading");
     const modelArtifacts: tf.io.ModelArtifacts = Object.assign({}, this.modelJson);
+    Object.keys(this.modelJson).forEach(k => {
+      console.log(`${k} ${typeof(this.modelJson[k])}`);
+    })
     modelArtifacts.modelTopology = base64decode(this.modelJson.modelTopology as string);
     modelArtifacts.weightData = base64decode(this.modelJson.weightData as string);
     console.log("JsonIOHandler.modelArtifacts", modelArtifacts);
@@ -68,10 +78,10 @@ class JsonIOHandler implements tf.io.IOHandler {
   }
 }
 
-export const predict = async (
+export const predict = (
   model: PersistedModel,
   input: PredictionInput
-): Promise<[PredictionResult | undefined, Error | undefined]> => {
+): [PredictionResult | undefined, Error | undefined] => {
   if (!model) {
     return [
       undefined,

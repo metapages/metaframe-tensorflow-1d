@@ -36,11 +36,13 @@ export interface PersistedModelMetadata {
 }
 
 export interface PersistedModel {
+  type: "PersistedModel.v1" | "PersistedModelJson.v1";
   model: tf.LayersModel;
   meta: PersistedModelMetadata;
 }
 
 export interface PersistedModelJson extends Omit<PersistedModel, "model"> {
+  type: "PersistedModel.v1" | "PersistedModelJson.v1";
   version?: number; // not currently used, but best to start with a plan for versioning
   model: any;
 }

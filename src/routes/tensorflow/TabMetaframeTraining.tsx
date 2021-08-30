@@ -1,4 +1,4 @@
-import { h, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import { useMetaframe, useHashParamBoolean } from "@metapages/metaframe-hook";
 import objectHash from "object-hash";
@@ -46,18 +46,6 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
       }
     })();
   }, [setTrainingDataSet]);
-
-  // always send the model to the metaframe outputs
-  useEffect(() => {
-    if (!model) {
-      return;
-    }
-    (async () => {
-      const persistedModelJson = await modelToJson(model);
-      console.log('🌞 SENT MODEL TO metaframe.outputs["model"]')
-      metaframeObject.setOutputs!({ model: persistedModelJson });
-    })();
-  }, [model, metaframeObject.setOutputs]);
 
   // update the trainingDataSet if a new (hashed to check) arrives
   useEffect(() => {
@@ -160,6 +148,7 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
           }
 
           model = {
+            type: "PersistedModel.v1",
             model: loadedModel,
             meta: meta,
           };
@@ -182,6 +171,7 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
       setMessages([messageHeader, { message: "✅ Trained", type: "warning" }]);
 
       model = {
+        type: "PersistedModel.v1",
         model: trainer.model,
         meta: meta,
       };
@@ -204,14 +194,17 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
     };
   }, [trainingDataSet, nocache, setModel, metaframeObject?.setOutputs]);
 
+  // always send the model to the metaframe outputs
   useEffect(() => {
-    if (model && metaframeObject?.setOutputs) {
-      (async () => {
-        const modelDehydrated:PersistedModelJson = await modelToJson(model);
-        metaframeObject.setOutputs!({model:modelDehydrated});
-      })();
+    if (!model || !metaframeObject?.setOutputs) {
+      return;
     }
-  }, [model, metaframeObject?.setOutputs])
+    (async () => {
+      const persistedModelJson:PersistedModelJson = await modelToJson(model);
+      console.log('🌞 SENT MODEL TO metaframe.outputs["model"]')
+      metaframeObject.setOutputs!({ model: persistedModelJson });
+    })();
+  }, [model, metaframeObject.setOutputs]);
 
   /* id="Training" is consumed by Trainer */
   return (

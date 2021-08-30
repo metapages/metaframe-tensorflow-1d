@@ -1,4 +1,4 @@
-import { h, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { useEffect } from "preact/hooks";
 import { useMetaframe } from "@metapages/metaframe-hook";
 import { Home } from "./routes/home";
@@ -32,6 +32,6 @@ export const App: FunctionalComponent = () => {
       while(disposers.length > 0) disposers.pop()();
     }
   }, [metaframeObject.metaframe, setTrainingDataSet]);
-  
+
   return <Home />;
 };

@@ -1,4 +1,4 @@
-import { h, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { Option, OptionsMenuButton } from "@metapages/metaframe-ui-widgets";
 
 const appOptions: Option[] = [

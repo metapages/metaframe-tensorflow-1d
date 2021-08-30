@@ -1,4 +1,4 @@
-import { h, FunctionalComponent } from "preact";
+import { FunctionalComponent } from "preact";
 import { useCallback, useEffect } from "preact/hooks";
 import { Button } from "@chakra-ui/react";
 import { useStore } from "../store";
