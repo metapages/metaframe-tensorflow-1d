@@ -14,10 +14,6 @@ PACKAGE_NAME_SHORT                 := file_name(`cat package.json | jq -r '.name
 export DOCKER_IMAGE_PREFIX         := "ghcr.io/metapages/" + PACKAGE_NAME_SHORT
 # Always assume our current cloud ops image is versioned to the exact same app images we deploy
 export DOCKER_TAG                  := `if [ "${GITHUB_ACTIONS}" = "true" ]; then echo "${GITHUB_SHA}"; else echo "$(git rev-parse --short=8 HEAD)"; fi`
-# Some commands use deno because it's great at this stuff
-CLOUDSEED_DENO                     := "https://deno.land/x/cloudseed@v0.0.18"
-# cache deno modules on the host so they can be transferred to the docker container
-export DENO_DIR                    := ROOT + "/.tmp/deno"
 # The NPM_TOKEN is required for publishing to https://www.npmjs.com
 NPM_TOKEN                          := env_var_or_default("NPM_TOKEN", "")
 vite                               := "VITE_APP_FQDN=" + APP_FQDN + " VITE_APP_PORT=" + APP_PORT + " NODE_OPTIONS='--max_old_space_size=16384' ./node_modules/vite/bin/vite.js --clearScreen false"
@@ -88,9 +84,7 @@ npm_build: _ensure_npm_modules
 
 # bumps version, commits change, git tags
 npm_version npmversionargs="patch":
-    #!/usr/bin/env bash
-    printf "import { npmVersion } from '{{CLOUDSEED_DENO}}/npm/mod.ts';\
-    await npmVersion({cwd:'.', npmVersionArg:'{{npmversionargs}}'});" | deno run --unstable --allow-run --allow-read -
+    npm version {{npmversionargs}}
 
 # If the npm version does not exist, publish the module
 npm_publish: _require_NPM_TOKEN npm_build
@@ -112,7 +106,9 @@ npm_publish: _require_NPM_TOKEN npm_build
         exit 0
     fi
     echo "PUBLISHING npm version $VERSION"
-    echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    if [ ! -f .npmrc ]; then
+        echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    fi
     npm publish --access public .
 
 # deletesL .certs dist
@@ -248,9 +244,12 @@ _ensure_inside_docker:
         exit 1
     fi
 
-@_ensureGitPorcelain: _ensure_inside_docker
-    printf "import { ensureGitNoUncommitted } from '{{CLOUDSEED_DENO}}/git/mod.ts';\
-    await ensureGitNoUncommitted();" | deno run --unstable --allow-run --allow-read -
+@_ensureGitPorcelain:
+    if [ ! -z "$(git status --untracked-files=no --porcelain)" ]; then \
+        echo -e " ❗ Uncommitted files:"; \
+        git status --untracked-files=no --porcelain; \
+        exit 1; \
+    fi
 
 @_require_NPM_TOKEN:
 	if [ -z "{{NPM_TOKEN}}" ]; then echo "Missing NPM_TOKEN env var"; exit 1; fi
