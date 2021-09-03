@@ -214,6 +214,7 @@ githubpages_publish: _ensureGitPorcelain
             -w $WORKSPACE \
             {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} {{args}} || true
 
+#             -v $HOME/.aliases:/root/.aliases \
 # @_docker +args="bash": _build_docker
 #     echo -e "🌱 Entering docker context: {{bold}}{{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} from <cloud/>Dockerfile 🚪🚪{{normal}}"
 #     mkdir -p {{ROOT}}/.tmp
