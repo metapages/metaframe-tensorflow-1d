@@ -35,8 +35,11 @@ RUN VERSION=1.14.1 ; \
     tar xvf watchexec-$VERSION-i686-unknown-linux-musl.tar.xz watchexec-$VERSION-i686-unknown-linux-musl/watchexec -C /usr/bin/ --strip-components=1 && \
     rm -rf watchexec-*
 
+RUN git config --global user.email "ci@rob.ot"
+RUN git config --global user.name "robot"
+
 # Newer version of npm
-RUN npm i -g npm@7.21.1
+RUN /usr/bin/npm i -g npm@7.21.1
 
 # /repo is also hard-coded in the justfile
 WORKDIR /repo
@@ -44,3 +47,6 @@ WORKDIR /repo
 COPY package.json ./
 COPY package-lock.json ./
 RUN npm i
+
+# Reference user aliases
+RUN echo "source /repo/.tmp/.aliases" >> /root/.bashrc

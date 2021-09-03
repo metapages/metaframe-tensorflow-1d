@@ -16,7 +16,7 @@ export DOCKER_IMAGE_PREFIX         := "ghcr.io/metapages/" + PACKAGE_NAME_SHORT
 export DOCKER_TAG                  := `if [ "${GITHUB_ACTIONS}" = "true" ]; then echo "${GITHUB_SHA}"; else echo "$(git rev-parse --short=8 HEAD)"; fi`
 # The NPM_TOKEN is required for publishing to https://www.npmjs.com
 NPM_TOKEN                          := env_var_or_default("NPM_TOKEN", "")
-vite                               := "VITE_APP_FQDN=" + APP_FQDN + " VITE_APP_PORT=" + APP_PORT + " NODE_OPTIONS='--max_old_space_size=16384' ./node_modules/vite/bin/vite.js --clearScreen false"
+vite                               := "VITE_APP_FQDN=" + APP_FQDN + " VITE_APP_PORT=" + APP_PORT + " NODE_OPTIONS='--max_old_space_size=16384' ./node_modules/vite/bin/vite.js"
 tsc                                := "./node_modules/typescript/bin/tsc"
 # minimal formatting, bold is very useful
 bold                               := '\033[1m'
@@ -54,7 +54,7 @@ _dev: _ensure_npm_modules (_tsc "--build")
     #!/usr/bin/env bash
     APP_ORIGIN=https://${APP_FQDN}:${APP_PORT}
     echo "Browser development pointing to: ${APP_ORIGIN}"
-    VITE_APP_ORIGIN=${APP_ORIGIN} {{vite}}
+    VITE_APP_ORIGIN=${APP_ORIGIN} {{vite}} --clearScreen false
 
 # Build the browser client static assets and npm module
 build: (_tsc "--build") _browser_assets_build npm_build
@@ -62,11 +62,10 @@ build: (_tsc "--build") _browser_assets_build npm_build
 @test: npm_build
     just test/test
 
-# _ensure_inside_docker required?
 # publish to npm and github pages.
 publish npmversionargs="patch": _ensureGitPorcelain test (npm_version npmversionargs) npm_publish githubpages_publish
     @# Push the tags up
-    git push
+    git push origin v$(cat package.json | jq -r '.version')
 
 # rebuild the client on changes, but do not serve
 watch BUILD_SUB_DIR="./":
@@ -121,7 +120,7 @@ _browser_assets_build BUILD_SUB_DIR="": _ensure_npm_modules
     mkdir -p docs/{{BUILD_SUB_DIR}}
     find docs/{{BUILD_SUB_DIR}} -maxdepth 1 -type f -exec rm "{}" \;
     rm -rf docs/{{BUILD_SUB_DIR}}/assets
-    BUILD_SUB_DIR={{BUILD_SUB_DIR}} {{vite}} --debug build --mode=production
+    BUILD_SUB_DIR={{BUILD_SUB_DIR}} {{vite}} build --mode=production
 
 # compile typescript src, may or may not emit artifacts
 _tsc +args="": _ensure_npm_modules
@@ -192,6 +191,8 @@ githubpages_publish: _ensureGitPorcelain
     echo -e "🌱 Entering docker context: {{bold}}{{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} from <cloud/>Dockerfile 🚪🚪{{normal}}"
     mkdir -p {{ROOT}}/.tmp
     touch {{ROOT}}/.tmp/.bash_history
+    touch {{ROOT}}/.tmp/.aliases
+    if [ -f ~/.aliases ]; then cp ~/.aliases {{ROOT}}/.tmp/.aliases; fi
     export WORKSPACE=/repo && \
         docker run \
             --rm \
@@ -202,39 +203,23 @@ githubpages_publish: _ensureGitPorcelain
             -e DOCKER_IMAGE_PREFIX={{DOCKER_IMAGE_PREFIX}} \
             -e HISTFILE=$WORKSPACE/.tmp/.bash_history \
             -e WORKSPACE=$WORKSPACE \
-            $(if [ -f .env ]; then echo "-v {{ROOT}}/.env:$WORKSPACE/.env"; else echo ""; fi) \
-            -v {{ROOT}}/.certs:$WORKSPACE/.certs \
-            -v {{ROOT}}/.dockerignore:$WORKSPACE/.dockerignore \
-            -v {{ROOT}}/.git:$WORKSPACE/.git \
-            -v {{ROOT}}/.github:$WORKSPACE/.github \
-            -v {{ROOT}}/.gitignore:$WORKSPACE/.gitignore \
-            $(if [ -f .npmrc ]; then echo "-v {{ROOT}}/.npmrc:$WORKSPACE/.npmrc"; else echo ""; fi) \
-            -v {{ROOT}}/dist:$WORKSPACE/dist \
-            -v {{ROOT}}/Dockerfile:$WORKSPACE/Dockerfile \
-            -v {{ROOT}}/docs:$WORKSPACE/docs \
-            -v {{ROOT}}/index.html:$WORKSPACE/index.html \
-            -v {{ROOT}}/justfile:$WORKSPACE/justfile \
-            -v {{ROOT}}/package-lock.json:$WORKSPACE/package-lock.json \
-            -v {{ROOT}}/package.json:$WORKSPACE/package.json \
-            -v {{ROOT}}/public:$WORKSPACE/public \
-            -v {{ROOT}}/README.md:$WORKSPACE/README.md \
-            -v {{ROOT}}/src:$WORKSPACE/src \
-            -v {{ROOT}}/test:$WORKSPACE/test \
-            -v {{ROOT}}/tsconfig.json:$WORKSPACE/tsconfig.json \
-            -v {{ROOT}}/vite.config.ts:$WORKSPACE/vite.config.ts \
-            -v $HOME/.gitconfig:/root/.gitconfig \
-            -v $HOME/.ssh:/root/.ssh \
+            -v {{ROOT}}:$WORKSPACE \
+            $(if [ -d $HOME/.gitconfig ]; then echo "-v $HOME/.gitconfig:/root/.gitconfig"; else echo ""; fi) \
+            $(if [ -d $HOME/.ssh ]; then echo "-v $HOME/.ssh:/root/.ssh"; else echo ""; fi) \
             -p {{APP_PORT}}:{{APP_PORT}} \
             --add-host {{APP_FQDN}}:127.0.0.1 \
             -w $WORKSPACE \
             {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} {{args}} || true
 
 # If the ./app docker image in not build, then build it
-@_build_docker:
-    if [[ "$(docker images -q {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} 2> /dev/null)" == "" ]]; then \
-        echo -e "🌱🌱  ➡ {{bold}}Building docker image ...{{normal}} 🚪🚪 "; \
-        echo -e "🌱 </> {{bold}}docker build -t {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} . {{normal}}🚪 "; \
-        docker build -t {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} . ; \
+_build_docker:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    if [[ "$(docker images -q {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} 2> /dev/null)" == "" ]]; then
+        echo -e "🌱🌱  ➡ {{bold}}Building docker image ...{{normal}} 🚪🚪 ";
+        echo -e "🌱 </> {{bold}}docker build -t {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} . {{normal}}🚪 ";
+        docker build -t {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} . ;
     fi
 
 _ensure_inside_docker:
