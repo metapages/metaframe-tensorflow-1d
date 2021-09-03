@@ -62,8 +62,9 @@ build: (_tsc "--build") _browser_assets_build npm_build
 @test: npm_build
     just test/test
 
+# _ensure_inside_docker required?
 # publish to npm and github pages.
-publish npmversionargs="patch": _ensure_inside_docker _ensureGitPorcelain test (npm_version npmversionargs) npm_publish githubpages_publish
+publish npmversionargs="patch": _ensureGitPorcelain test (npm_version npmversionargs) npm_publish githubpages_publish
     @# Push the tags up
     git push
 
