@@ -88,9 +88,9 @@ npm_build: _ensure_npm_modules
 
 # bumps version, commits change, git tags
 npm_version npmversionargs="patch":
-    #!/usr/bin/env -S deno run --unstable --allow-run
-    import { npmVersion } from '{{CLOUDSEED_DENO}}/npm/mod.ts';
-    await npmVersion({npmVersionArg:'{{npmversionargs}}'});
+    #!/usr/bin/env bash
+    printf "import { npmVersion } from '{{CLOUDSEED_DENO}}/npm/mod.ts';\
+    await npmVersion({cwd:'.', npmVersionArg:'{{npmversionargs}}'});" | deno run --unstable --allow-run --allow-read -
 
 # If the npm version does not exist, publish the module
 npm_publish: _require_NPM_TOKEN npm_build
