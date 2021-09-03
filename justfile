@@ -207,10 +207,13 @@ githubpages_publish: _ensureGitPorcelain
             -e WORKSPACE=$WORKSPACE \
             $(if [ -f .env ]; then echo "-v {{ROOT}}/.env:$WORKSPACE/.env"; else echo ""; fi) \
             -v {{ROOT}}/.certs:$WORKSPACE/.certs \
+            -v {{ROOT}}/.dockerignore:$WORKSPACE/.dockerignore \
             -v {{ROOT}}/.git:$WORKSPACE/.git \
+            -v {{ROOT}}/.github:$WORKSPACE/.github \
             -v {{ROOT}}/.gitignore:$WORKSPACE/.gitignore \
             $(if [ -f .npmrc ]; then echo "-v {{ROOT}}/.npmrc:$WORKSPACE/.npmrc"; else echo ""; fi) \
             -v {{ROOT}}/dist:$WORKSPACE/dist \
+            -v {{ROOT}}/Dockerfile:$WORKSPACE/Dockerfile \
             -v {{ROOT}}/docs:$WORKSPACE/docs \
             -v {{ROOT}}/index.html:$WORKSPACE/index.html \
             -v {{ROOT}}/justfile:$WORKSPACE/justfile \
