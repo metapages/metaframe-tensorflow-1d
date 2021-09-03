@@ -214,49 +214,6 @@ githubpages_publish: _ensureGitPorcelain
             -w $WORKSPACE \
             {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} {{args}} || true
 
-#             $(if [ -f {{ROOT}}/.tmp/ ]; then echo "-v {{ROOT}}/.env:$WORKSPACE/.env"; else echo ""; fi) \
-#             -v $HOME/.aliases:/root/.aliases \
-# @_docker +args="bash": _build_docker
-#     echo -e "🌱 Entering docker context: {{bold}}{{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} from <cloud/>Dockerfile 🚪🚪{{normal}}"
-#     mkdir -p {{ROOT}}/.tmp
-#     touch {{ROOT}}/.tmp/.bash_history
-#     export WORKSPACE=/repo && \
-#         docker run \
-#             --rm \
-#             -ti \
-#             -e DOCKER_IMAGE_PREFIX=${DOCKER_IMAGE_PREFIX} \
-#             -e PS1="< \w/> " \
-#             -e PROMPT="<%/% > " \
-#             -e DOCKER_IMAGE_PREFIX={{DOCKER_IMAGE_PREFIX}} \
-#             -e HISTFILE=$WORKSPACE/.tmp/.bash_history \
-#             -e WORKSPACE=$WORKSPACE \
-#             $(if [ -f .env ]; then echo "-v {{ROOT}}/.env:$WORKSPACE/.env"; else echo ""; fi) \
-#             -v {{ROOT}}/.certs:$WORKSPACE/.certs \
-#             -v {{ROOT}}/.dockerignore:$WORKSPACE/.dockerignore \
-#             -v {{ROOT}}/.git:$WORKSPACE/.git \
-#             -v {{ROOT}}/.github:$WORKSPACE/.github \
-#             -v {{ROOT}}/.gitignore:$WORKSPACE/.gitignore \
-#             $(if [ -f .npmrc ]; then echo "-v {{ROOT}}/.npmrc:$WORKSPACE/.npmrc"; else echo ""; fi) \
-#             -v {{ROOT}}/dist:$WORKSPACE/dist \
-#             -v {{ROOT}}/Dockerfile:$WORKSPACE/Dockerfile \
-#             -v {{ROOT}}/docs:$WORKSPACE/docs \
-#             -v {{ROOT}}/index.html:$WORKSPACE/index.html \
-#             -v {{ROOT}}/justfile:$WORKSPACE/justfile \
-#             -v {{ROOT}}/package-lock.json:$WORKSPACE/package-lock.json \
-#             -v {{ROOT}}/package.json:$WORKSPACE/package.json \
-#             -v {{ROOT}}/public:$WORKSPACE/public \
-#             -v {{ROOT}}/README.md:$WORKSPACE/README.md \
-#             -v {{ROOT}}/src:$WORKSPACE/src \
-#             -v {{ROOT}}/test:$WORKSPACE/test \
-#             -v {{ROOT}}/tsconfig.json:$WORKSPACE/tsconfig.json \
-#             -v {{ROOT}}/vite.config.ts:$WORKSPACE/vite.config.ts \
-#             -v $HOME/.gitconfig:/root/.gitconfig \
-#             -v $HOME/.ssh:/root/.ssh \
-#             -p {{APP_PORT}}:{{APP_PORT}} \
-#             --add-host {{APP_FQDN}}:127.0.0.1 \
-#             -w $WORKSPACE \
-#             {{DOCKER_IMAGE_PREFIX}}:{{DOCKER_TAG}} {{args}} || true
-
 # If the ./app docker image in not build, then build it
 _build_docker:
     #!/usr/bin/env bash
