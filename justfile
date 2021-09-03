@@ -47,14 +47,14 @@ _help:
 # Run the dev server. Opens the web app in browser.
 @dev:
     if [ -f /.dockerenv ]; then \
-        just _dev_container; \
+        just _dev; \
     else \
         just _mkcert; \
         open https://${APP_FQDN}:${APP_PORT}; \
-        just _docker just _dev_container; \
+        just _docker just _dev; \
     fi
 
-_dev_container: _ensure_npm_modules (_tsc "--build")
+_dev: _ensure_npm_modules (_tsc "--build")
     #!/usr/bin/env bash
     APP_ORIGIN=https://${APP_FQDN}:${APP_PORT}
     echo "Browser development pointing to: ${APP_ORIGIN}"

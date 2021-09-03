@@ -28,6 +28,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { TrainingMetadata, PredictionMetadata } from "./metaframe";
 
+// ranges of the training data, shape for incoming predictions
 export interface PersistedModelMetadata {
   // user supplied id, for tracking training, models, and predictions
   modelId?: string;
@@ -35,6 +36,7 @@ export interface PersistedModelMetadata {
   training: TrainingMetadata;
 }
 
+// The tf native model plus stuff describing how I made it and what goes in it now
 export interface PersistedModel {
   type: "PersistedModel.v1" | "PersistedModelJson.v1";
   model: tf.LayersModel;
@@ -43,6 +45,11 @@ export interface PersistedModel {
 
 export interface PersistedModelJson extends Omit<PersistedModel, "model"> {
   type: "PersistedModel.v1" | "PersistedModelJson.v1";
-  version?: number; // not currently used, but best to start with a plan for versioning
-  model: any;
+  model: ModelArtifactsEncoded;
+}
+
+export type ModelArtifactsEncoded = {
+  modelTopologyAndWeightManifest :tf.io.ModelJSON;
+  // ArrayBuffer converted to base64 encoded strings
+  weightData:string;
 }

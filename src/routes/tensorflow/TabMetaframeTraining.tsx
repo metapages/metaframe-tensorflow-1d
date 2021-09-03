@@ -4,7 +4,7 @@ import { useMetaframe, useHashParamBoolean } from "@metapages/metaframe-hook";
 import objectHash from "object-hash";
 import * as tf from "@tensorflow/tfjs";
 import { ButtonClearCache } from "../../components/ButtonClearCache";
-import { TrainingDataPoint, TrainingDataSet } from "../../lib/metaframe";
+import { TrainingDataSet } from "../../lib/metaframe";
 import { TrainingData } from "../../lib/TrainingData";
 import { Trainer } from "../../lib/Trainer";
 import { useStore, MessagePayload } from "../../store";
@@ -15,6 +15,7 @@ import {
   PersistedModelMetadata,
 } from "../../lib/types";
 import localForage from "localforage";
+import { verifySaveLoadPrediction } from "../../lib/test";
 
 const id = "test";
 
@@ -73,7 +74,12 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
   const setMessages = useStore((state) => state.setMessages);
   // triggered on a new trainingDataSet: train a new model
   useEffect(() => {
-    if (!trainingDataSet || !trainingDataSet.examples || trainingDataSet.examples.length === 0 || !metaframeObject?.setOutputs) {
+    if (
+      !trainingDataSet ||
+      !trainingDataSet.examples ||
+      trainingDataSet.examples.length === 0 ||
+      !metaframeObject?.setOutputs
+    ) {
       return;
     }
 
@@ -82,10 +88,15 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
       type: "info",
     };
 
-    const keys = Object.keys(trainingDataSet.examples.reduce<Record<string, boolean>>((map, current) => {
-      map[current.label] = true;
-      return map;
-    }, {}));
+    const keys = Object.keys(
+      trainingDataSet.examples.reduce<Record<string, boolean>>(
+        (map, current) => {
+          map[current.label] = true;
+          return map;
+        },
+        {}
+      )
+    );
 
     if (keys.length < 2) {
       const messageNotEnoughLabels: MessagePayload = {
@@ -99,7 +110,6 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
     let cancelled = false;
 
     (async () => {
-
       const messageLoading: MessagePayload = {
         message: "loading data...",
         type: "info",
@@ -155,7 +165,10 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
 
           setMessages([
             messageHeader,
-            { message: `Model ready (cached) ${hash.substr(0, 10)}`, type: "success" },
+            {
+              message: `Model ready (cached) ${hash.substr(0, 10)}`,
+              type: "success",
+            },
           ]);
           setModel(model);
           return;
@@ -196,15 +209,15 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
 
   // always send the model to the metaframe outputs
   useEffect(() => {
-    if (!model || !metaframeObject?.setOutputs) {
+    if (!model || !metaframeObject?.setOutputs || !trainingDataSet) {
       return;
     }
     (async () => {
-      const persistedModelJson:PersistedModelJson = await modelToJson(model);
-      console.log('🌞 SENT MODEL TO metaframe.outputs["model"]')
+      await verifySaveLoadPrediction(model, trainingDataSet);
+      const persistedModelJson: PersistedModelJson = await modelToJson(model);
       metaframeObject.setOutputs!({ model: persistedModelJson });
     })();
-  }, [model, metaframeObject.setOutputs]);
+  }, [model, trainingDataSet, metaframeObject.setOutputs]);
 
   /* id="Training" is consumed by Trainer */
   return (
