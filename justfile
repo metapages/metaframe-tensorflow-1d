@@ -3,6 +3,7 @@
 ###############################################################
 # just docs: https://github.com/casey/just
 set shell                          := ["bash", "-c"]
+set dotenv-load                    := true
 # E.g. 'my.app.com'. Some services e.g. auth need know the external endpoint for example OAuth
 # The root domain for this app, serving index.html
 export APP_FQDN                    := env_var_or_default("APP_FQDN", "metaframe1.dev")
