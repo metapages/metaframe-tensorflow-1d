@@ -51,21 +51,34 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
 
   // update the trainingDataSet if a new (hashed to check) arrives
   useEffect(() => {
-    const incomingTrainingData = metaframeObject?.inputs["training"];
-    if (incomingTrainingData && incomingTrainingData !== setTrainingDataSet) {
-      const incomingHash = objectHash(incomingTrainingData);
-      if (incomingHash !== currentlyTrainingDataHash) {
-        setCurrentlyTrainingDataHash(incomingHash);
-        setTrainingDataSet(incomingTrainingData);
-      }
-
-      // Degbugging
-      if (DEBUG_CACHE_TRAINING_DATA) {
-        localForage.setItem(`TrainingDataSet${id}`, incomingTrainingData);
-      }
+    if (!metaframeObject.metaframe) {
+      return;
     }
+
+    const disposer = metaframeObject.metaframe.onInput(
+      "training",
+      (incomingTrainingData: any) => {
+        if (
+          incomingTrainingData &&
+          incomingTrainingData !== setTrainingDataSet
+        ) {
+          const incomingHash = objectHash(incomingTrainingData);
+          if (incomingHash !== currentlyTrainingDataHash) {
+            setCurrentlyTrainingDataHash(incomingHash);
+            setTrainingDataSet(incomingTrainingData);
+          }
+
+          // Degbugging
+          if (DEBUG_CACHE_TRAINING_DATA) {
+            localForage.setItem(`TrainingDataSet${id}`, incomingTrainingData);
+          }
+        }
+      }
+    );
+
+    return disposer;
   }, [
-    metaframeObject.inputs,
+    metaframeObject.metaframe,
     currentlyTrainingDataHash,
     setCurrentlyTrainingDataHash,
     setTrainingDataSet,
@@ -79,7 +92,7 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
       !trainingDataSet ||
       !trainingDataSet.examples ||
       trainingDataSet.examples.length === 0 ||
-      !metaframeObject?.setOutputs
+      !metaframeObject?.metaframe
     ) {
       return;
     }
@@ -167,7 +180,7 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
           setMessages([
             messageHeader,
             {
-              message: `Model ready (cached) ${hash.substr(0, 10)}`,
+              message: `Model ready (cached) ${hash.substring(0, 10)}`,
               type: "success",
             },
           ]);
@@ -199,26 +212,36 @@ export const TabMetaframeTraining: FunctionalComponent = () => {
 
       setMessages([
         messageHeader,
-        { message: `✅ Model ready ${hash.substr(0, 10)}`, type: "success" },
+        { message: `✅ Model ready ${hash.substring(0, 10)}`, type: "success" },
       ]);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [trainingDataSet, nocache, setModel, metaframeObject?.setOutputs]);
+  }, [trainingDataSet, nocache, setModel, metaframeObject?.metaframe]);
 
   // always send the model to the metaframe outputs
   useEffect(() => {
-    if (!model || !metaframeObject?.setOutputs || !trainingDataSet) {
+    if (!model || !metaframeObject?.metaframe?.setOutputs || !trainingDataSet) {
       return;
     }
+    let cancelled = false;
     (async () => {
       await verifySaveLoadPrediction(model, trainingDataSet);
+      if (cancelled) {
+        return;
+      }
       const persistedModelJson: PersistedModelJson = await modelToJson(model);
-      metaframeObject.setOutputs!({ model: persistedModelJson });
+      if (cancelled) {
+        return;
+      }
+      metaframeObject!.metaframe!.setOutputs!({ model: persistedModelJson });
     })();
-  }, [model, trainingDataSet, metaframeObject.setOutputs]);
+    return () => {
+      cancelled = true;
+    };
+  }, [model, trainingDataSet, metaframeObject.metaframe]);
 
   /* id="Training" is consumed by Trainer */
   return (

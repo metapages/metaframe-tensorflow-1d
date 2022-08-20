@@ -3,7 +3,7 @@ import { useEffect } from "preact/hooks";
 import { useMetaframe } from "@metapages/metaframe-hook";
 import { Home } from "./routes/home";
 import { PredictionInputEncoded, TrainingDataSet } from "./lib/metaframe";
-import { useStore, MessagePayload } from "./store";
+import { useStore } from "./store";
 
 export const App: FunctionalComponent = () => {
 
@@ -29,7 +29,7 @@ export const App: FunctionalComponent = () => {
     }));
 
     return () => {
-      while(disposers.length > 0) disposers.pop()();
+      while(disposers.length > 0) disposers.pop()!();
     }
   }, [metaframeObject.metaframe, setTrainingDataSet]);
 
