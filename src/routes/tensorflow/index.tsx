@@ -18,7 +18,7 @@ import { ButtonOptions } from "../../components/ButtonOptions";
 import { ButtonHelp } from "../../components/ButtonHelp";
 import { TabMetaframeTraining } from "./TabMetaframeTraining";
 import { TabMetaframePrediction } from "./TabMetaframePrediction";
-import { useHashParamInt } from "@metapages/metaframe-hook";
+import { useHashParamInt } from "@metapages/hash-query";
 import { Messages } from "../../components/Messages";
 import { TabVisualizeTrainingData } from "./TabVisualizeTrainingData";
 

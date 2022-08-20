@@ -8,7 +8,7 @@ import {
   IconButton,
   DrawerCloseButton,
 } from "@chakra-ui/react";
-import { isIframe, useHashParamJson } from "@metapages/metaframe-hook";
+import { isIframe, useHashParamJson } from "@metapages/hash-query";
 import { QuestionIcon } from "@chakra-ui/icons";
 import { OptionBlob } from "./ButtonOptions";
 

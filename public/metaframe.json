@@ -1,29 +1,31 @@
 {
-	"version": "0.4.3",
-	"metadata": {
-		"version": "0.1",
-		"title": "Tensorflow 1D convolutional net trainer"
+  "version": "0.5",
+  "metadata": {
+    "name": "Tensorflow 1D convolutional net trainer",
+    "description": "In browser machine learning: train and evaluate models using any 1D inputs",
+    "tags": ["tensorflow", "machine learning", "convolutional net", "1d", "ml"],
+	"image": "https://metapages.github.io/metaframe-tensorflow-1d/android-chrome-192x192.png"
+  },
+  "inputs": {
+    "training": {
+      "type": "./types/TrainingDataSet"
     },
-    "inputs": {
-		"training": {
-			"type": "./types/TrainingDataSet"
-		},
-		"prediction": {
-			"type": "./types/PredictionInputEncoded"
-		},
-		"model": {
-			"type": "./types/PersistedModelJson"
-		}
-	},
-    "outputs": {
-		"model": {
-			"type": "./types/PersistedModelJson"
-		},
-		"prediction": {
-			"type": "./types/PredictionResult"
-		},
-		"error": {
-			"type": "json"
-		}
-	}
+    "prediction": {
+      "type": "./types/PredictionInputEncoded"
+    },
+    "model": {
+      "type": "./types/PersistedModelJson"
+    }
+  },
+  "outputs": {
+    "model": {
+      "type": "./types/PersistedModelJson"
+    },
+    "prediction": {
+      "type": "./types/PredictionResult"
+    },
+    "error": {
+      "type": "json"
+    }
+  }
 }

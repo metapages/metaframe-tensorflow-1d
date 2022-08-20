@@ -1,6 +1,7 @@
 import { FunctionalComponent } from "preact";
 import { useEffect, useState } from "preact/hooks";
-import { useMetaframe, useHashParamBoolean } from "@metapages/metaframe-hook";
+import { useMetaframe } from "@metapages/metaframe-hook";
+import { useHashParamBoolean } from "@metapages/hash-query";
 import objectHash from "object-hash";
 import * as tf from "@tensorflow/tfjs";
 import { ButtonClearCache } from "../../components/ButtonClearCache";
