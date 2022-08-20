@@ -171,6 +171,7 @@ githubpages_publish: _ensureGitPorcelain
     git checkout gh-pages
     # Prefer changes in CURRENT_BRANCH, not our incoming gh-pages rebase
     git rebase -Xours ${CURRENT_BRANCH}
+    npm i
     just _browser_assets_build v$(cat package.json | jq -r .version)
     just _browser_assets_build
     # Now commit and push
@@ -204,6 +205,7 @@ githubpages_publish: _ensureGitPorcelain
             -e HISTFILE=$WORKSPACE/.tmp/.bash_history \
             -e WORKSPACE=$WORKSPACE \
             -v {{ROOT}}:$WORKSPACE \
+            -v {{PACKAGE_NAME_SHORT}}_node_modules:$WORKSPACE/node_modules \
             $(if [ -d $HOME/.gitconfig ]; then echo "-v $HOME/.gitconfig:/root/.gitconfig"; else echo ""; fi) \
             $(if [ -d $HOME/.ssh ]; then echo "-v $HOME/.ssh:/root/.ssh"; else echo ""; fi) \
             -p {{APP_PORT}}:{{APP_PORT}} \

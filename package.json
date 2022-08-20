@@ -22,7 +22,7 @@
     "@emotion/styled": "^11.3.0",
     "@metapages/hash-query": "^0.3.12",
     "@metapages/metaframe-hook": "^1.0.9",
-    "@metapages/metaframe-ui-widgets": "^0.2.5",
+    "@metapages/metaframe-ui-widgets": "^0.2.10",
     "@metapages/metapage": "^0.11.0",
     "@tensorflow/tfjs": "^1.7.4",
     "@tensorflow/tfjs-vis": "^1.4.0",
