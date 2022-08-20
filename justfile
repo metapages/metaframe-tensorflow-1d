@@ -171,7 +171,7 @@ githubpages_publish: _ensureGitPorcelain
     git checkout gh-pages
     # Prefer changes in CURRENT_BRANCH, not our incoming gh-pages rebase
     git rebase -Xours ${CURRENT_BRANCH}
-    just _browser_assets_build ./v$(cat package.json | jq -r .version)
+    just _browser_assets_build v$(cat package.json | jq -r .version)
     just _browser_assets_build
     # Now commit and push
     git add --all --force docs
