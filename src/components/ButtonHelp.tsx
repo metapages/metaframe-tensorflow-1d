@@ -63,7 +63,7 @@ const HelpPanel: FunctionalComponent<{
     setOpen(false);
   }, [setOpen]);
 
-  const iframeUrl = `https://metapages.github.io/metaframe-markdown/#?url=${url}`;
+  const iframeUrl = `https://markdown.mtfm.io/#?url=${url}`;
 
   return (
     <Drawer
