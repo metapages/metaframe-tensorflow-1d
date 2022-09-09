@@ -5,7 +5,7 @@
     "url": "https://github.com/metapages/metaframe-tensorflow-1d"
   },
   "homepage": "https://github.com/metapages/metaframe-tensorflow-1d/tree/main/docs#readme",
-  "version": "0.3.31",
+  "version": "0.3.32",
   "files": [
     "dist/**/*"
   ],
